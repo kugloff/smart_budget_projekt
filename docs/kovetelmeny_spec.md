@@ -53,10 +53,10 @@ A felhasználók adatbiztonságát alapvető szinten garantálni kell (pl. loká
 **Tervezett folyamat:**
 
 1. A felhasználó bejelentkezik az alkalmazásba (opcionális).  
-2. A főoldalon megadja a napi/heti/havi kiadásokat (összeg, kategória, dátum, megjegyzés).  
+2. A főoldalon megadja a napi kiadásokat (összeg, kategória, dátum, megjegyzés).  
 3. Az adatok eltárolódnak a Flask backend SQLite adatbázisában.  
 4. A rendszer valós időben frissíti a grafikonokat.  
-5. A felhasználó az **„Elemzés”** gombbal AI-tól kér szöveges visszajelzést.  
+5. A felhasználó az AI-tól kérhet szöveges visszajelzést.  
 6. Az AI (pl. OpenAI API) elemzi a kiadásokat, és visszaadja a javaslatokat.  
 7. Az eredmények megjelennek a React frontendben, letisztult vizuális formában.
 
@@ -74,7 +74,7 @@ A felhasználók adatbiztonságát alapvető szinten garantálni kell (pl. loká
 | F5 | A rendszer képes legyen mesterséges intelligencia segítségével elemzést és tanácsot adni a költési adatok alapján.|
 | F6 | A felhasználó bármikor új elemzést kérhessen a friss adatok alapján. |
 | F7 | Az AI által generált elemzést jelenítse meg olvasható, szöveges formában a webes felületen. ||
-| F8 | A rendszer kezelje az adatbázisban a havi adatokat (pl. szűrés dátum alapján). | 
+| F8 | A rendszer kezelje az adatbázisban a havi adatokat (pl. szűrés év, hónap alapján). | 
 | F9 | A felhasználó törölhessen vagy szerkeszthessen meglévő bejegyzéseket. |
 | F10 | A rendszer reszponzív legyen, mobil és desktop nézetben is használható. |
 

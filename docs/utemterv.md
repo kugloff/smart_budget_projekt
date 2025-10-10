@@ -15,8 +15,8 @@
 | 5-6 | Backend alapok | Flask REST API létrehozása, SQLite adatbázis, CRUD műveletek kiadásokra | POST / GET / PUT / DELETE végpontok |
 | 7 | Frontend-backend integráció | Adatok lekérése és küldése az API-n keresztül, listanézetek frissítése | JSON alapú kommunikáció |
 | 8 | Grafikonok és statisztikák | Kategória szerinti grafikonok (Pie/Bar chart), összesítések | Recharts vagy Chart.js használata |
-| 9 | AI elemzés integráció | OpenAI API hívás, promptok előkészítése, AI válasz megjelenítése | Elemzés gomb + szöveges kártya frontendre |
-| 10 | Felhasználói interakciók | Bejegyzés szerkesztés, törlés, hibakezelés, adatvalidálás | Robosztus UI, hibajelzés |
+| 9 | AI elemzés integráció | OpenAI API hívás, promptok előkészítése, AI válasz megjelenítése | Gombok, chat-felület Frontendre |
+| 10 | Felhasználói interakciók | Bejegyzés szerkesztés, törlés, hibakezelés, adatvalidálás | UI, hibajelzés |
 | 11 | Tesztelés és hibajavítás | Egységtesztek, integrációs tesztek, UI tesztelés | Frontend és backend funkciók ellenőrzése |
 | 12 | Dokumentáció és leadás | Projekt dokumentáció, képernyőtervek, use case diagramok, végső README.md | RFT leadásra kész verzió |
 
@@ -27,7 +27,7 @@
 | Verzió | Funkciók | Megvalósítási státusz |
 |--------|----------|----------------------|
 | V1.0 (3 hónap) | Kiadások bevitele, listázás, grafikonok, AI elemzés | Kötelező funkciók |
-| V1.1 (később) | Bevételek kezelése, havi célok, PDF export, további AI elemzések | Későbbi verzióba halasztva |
+| V1.1 (később) | Havi célok, további AI elemzések | Későbbi verzióba halasztva |
 | V1.2 | Felhasználói fiókok, felhő alapú szinkronizáció, bővített riportok | Későbbi verzióba halasztva |
 
 ---

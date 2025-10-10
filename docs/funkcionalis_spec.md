@@ -54,9 +54,9 @@ A felhasználó számára egy **webes felület** biztosítja:
 | Funkció | Leírás | UI elem |
 |---------|--------|---------|
 | Kiadás rögzítése | Új költség bevitele (összeg, kategória, dátum, megjegyzés) | Űrlap (Form), "Mentés" gomb |
-| Kiadások listázása | A korábbi kiadások megtekintése | Táblázat, szűrés dátum szerint |
+| Kiadások listázása | A korábbi kiadások megtekintése | Szűrés |
 | Kategóriánkénti statisztika | Összesítés és grafikon készítése | Pie chart, bar chart |
-| AI elemzés | Költségek AI által történő elemzése és tanácsadás | "Elemzés" gomb, szöveges kártya |
+| AI elemzés | Költségek AI által történő elemzése és tanácsadás | Gombok, szöveges kártyák |
 | Bejegyzés szerkesztés/törlés | Meglévő kiadás módosítása vagy törlése | "Szerkesztés" és "Törlés" gomb |
 
 ---
@@ -76,8 +76,8 @@ A felhasználó számára egy **webes felület** biztosítja:
 2. A felhasználó rögzíti az összes havi költést az űrlapon.  
 3. A rendszer elmenti az adatokat a backend SQLite adatbázisába.  
 4. A felhasználó megtekinti a kiadások grafikonos összegzését.  
-5. A felhasználó az "Elemzés" gombra kattint.  
-6. Az AI elemzés visszaadja a szöveges pénzügyi tanácsokat.  
+5. A felhasználó az "AI-alapú tanácsadás" gombra kattint.  
+6. Az AI elemzés visszaadja a kért szöveges pénzügyi tanácsokat.  
 7. Az eredmény megjelenik a felhasználó felületén.
 
 ---
@@ -88,9 +88,9 @@ A felhasználó számára egy **webes felület** biztosítja:
 |------------------------------------|---------------------|
 | F1 – Kiadások bevitele | Kiadás rögzítése űrlap és "Mentés" gomb |
 | F2 – Adatok mentése backendbe | SQLite adatbázis + Flask REST API |
-| F3 – Kiadások listázása | Táblázat nézet, szűrés |
+| F3 – Kiadások listázása | Nézet, szűrés |
 | F4 – Grafikon készítése | Pie/bar chart komponens |
-| F5 – AI elemzés | "Elemzés" gomb + AI kártya |
+| F5 – AI elemzés | AI-tanácsadás |
 | F9 – Bejegyzés szerkesztés/törlés | "Szerkesztés" és "Törlés" gombok |
 | F10 – Reszponzív felület | CSS + React reszponzív komponensek |
 
@@ -99,9 +99,9 @@ A felhasználó számára egy **webes felület** biztosítja:
 ## 6. Képernyőtervek
 
 [@TODO]
-- Főoldal: bevitel űrlap + kiadások táblázat + grafikon  
-- Elemzés oldal: AI tanács kártya, grafikonos összegzés  
-- Mobil nézet: reszponzív layout, menük (collapse, sandwich)
+- Kiadások (főoldal): bevitel űrlap + kiadások megjelenítése
+- Elemzés oldal: grafikonos összegzés  
+- Mobil nézet: reszponzív layout, menük (collapse)
 
 ---
 
