@@ -1,4 +1,4 @@
-# 2. Rendszerjavaslat kidolgozása
+# 2. Rendszerjavaslat
 
 ## 2.1. Funkcionális specifikáció
 
@@ -14,12 +14,12 @@ A következő részben a felhasználó szemszögéből írjuk le a rendszert, a 
 
 ---
 
-## 1. Jelenlegi helyzet
+## 2.1.1 Jelenlegi helyzet
 A felhasználók jelenleg manuálisan vezetik költségeiket Excelben vagy jegyzetfüzetben, az adatok nem kerülnek elemzésre, nincs automatikus pénzügyi tanácsadás. A pénzügyi döntések nem adatvezéreltek. (Hivatkozás: 1.1 Jelenlegi helyzet leírása)
 
 ---
 
-## 2. Vágyálomrendszer
+## 2.1.2 Vágyálomrendszer
 A felhasználó számára egy **webes felület** biztosítja:
 - költségek bevitelét (összeg, kategória, dátum, megjegyzés),
 - valós idejű grafikonos megjelenítést,
@@ -29,7 +29,7 @@ A felhasználó számára egy **webes felület** biztosítja:
 
 ---
 
-## 3. Rendszerre vonatkozó előírások
+## 2.1.3 Rendszerre vonatkozó előírások
 - GDPR megfelelés, ha felhasználói adatok kerülnek tárolásra
 - ISO/IEC 9126 minőségi irányelvek
 - WCAG 2.1 reszponzív webes hozzáférhetőség
@@ -40,7 +40,7 @@ A felhasználó számára egy **webes felület** biztosítja:
 
 ---
 
-## 4. Jelenlegi és igényelt üzleti folyamatok
+## 2.1.4 Jelenlegi és igényelt üzleti folyamatok
 - **Jelenlegi folyamatok:** manuális kiadásvezetés, nincs elemzés
 - **Igényelt folyamatok:** webes adatbevitel, kategorizálás, grafikonos összegzés, AI alapú pénzügyi tanácsadás  
 
@@ -48,9 +48,9 @@ A felhasználó számára egy **webes felület** biztosítja:
 
 ---
 
-## 5. Funkciók és használati esetek
+## 2.1.5 Funkciók és használati esetek
 
-### 5.1 Fő funkciók (menük, gombok, listák)
+### Fő funkciók (menük, gombok, listák)
 | Funkció | Leírás | UI elem |
 |---------|--------|---------|
 | Kiadás rögzítése | Új költség bevitele (összeg, kategória, dátum, megjegyzés) | Űrlap (Form), "Mentés" gomb |
@@ -61,18 +61,18 @@ A felhasználó számára egy **webes felület** biztosítja:
 
 ---
 
-### 5.2 Használati eset diagram
+### Használati eset diagram
 **Használati esetek (Use Case)**
 
 [@TODO]
 
 ---
 
-### 5.3 Forgatókönyv példa
+### Forgatókönyv példa
 
 **Forgatókönyv neve:** Havi költség elemzése  
 
-1. A felhasználó bejelentkezik.  
+1. A felhasználó bejelentkezik. (jelenleg nem kidolgozott funkció)
 2. A felhasználó rögzíti az összes havi költést az űrlapon.  
 3. A rendszer elmenti az adatokat a backend SQLite adatbázisába.  
 4. A felhasználó megtekinti a kiadások grafikonos összegzését.  
@@ -82,7 +82,7 @@ A felhasználó számára egy **webes felület** biztosítja:
 
 ---
 
-### 5.4 Funkció – követelmény megfeleltetés (traceability)
+### Funkció – követelmény megfeleltetés
 
 | Funkcionális követelmény (1.6.1) | Funkció a rendszerben |
 |------------------------------------|---------------------|
@@ -101,7 +101,7 @@ A felhasználó számára egy **webes felület** biztosítja:
 [@TODO]
 - Főoldal: bevitel űrlap + kiadások táblázat + grafikon  
 - Elemzés oldal: AI tanács kártya, grafikonos összegzés  
-- Mobil nézet: reszponzív layout, collapsible menük
+- Mobil nézet: reszponzív layout, menük (collapse, sandwich)
 
 ---
 
