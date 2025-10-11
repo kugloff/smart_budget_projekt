@@ -52,7 +52,7 @@ A felhasználók adatbiztonságát alapvető szinten garantálni kell (pl. loká
 ## 1.5 Igényelt üzleti folyamatok modellje
 **Tervezett folyamat:**
 
-1. A felhasználó bejelentkezik az alkalmazásba (opcionális).  
+1. A felhasználó bejelentkezik az alkalmazásba.  
 2. A főoldalon megadja a napi kiadásokat (összeg, kategória, dátum, megjegyzés).  
 3. Az adatok eltárolódnak a Flask backend SQLite adatbázisában.  
 4. A rendszer valós időben frissíti a grafikonokat.  

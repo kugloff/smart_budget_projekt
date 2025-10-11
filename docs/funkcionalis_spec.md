@@ -72,7 +72,7 @@ A felhasználó számára egy **webes felület** biztosítja:
 
 **Forgatókönyv neve:** Havi költség elemzése  
 
-1. A felhasználó bejelentkezik. (jelenleg nem kidolgozott funkció)
+1. A felhasználó bejelentkezik.
 2. A felhasználó rögzíti az összes havi költést az űrlapon.  
 3. A rendszer elmenti az adatokat a backend SQLite adatbázisába.  
 4. A felhasználó megtekinti a kiadások grafikonos összegzését.  
@@ -98,6 +98,11 @@ A felhasználó számára egy **webes felület** biztosítja:
 
 ## 6. Képernyőtervek
 ### DESKTOP nézet
+- DESKTOP Startup
+    - Bejelentkezés és Regisztráció
+
+![image](./pics/SU_DESKTOP_wireframe.png)
+
 - DESKTOP Kiadások (főoldal): 
     - Új nap hozzáadása,
     - Meglévő nap szerkesztése/törlése,
@@ -116,6 +121,10 @@ A felhasználó számára egy **webes felület** biztosítja:
 
 
 ### MOBIL nézet
+
+- MOBIL Startup (Bejelentkezés, Regisztráció)
+
+![image](./pics/SU_MOBIL_wireframe.png)
 
 - MOBIL Navigációs menü
 
