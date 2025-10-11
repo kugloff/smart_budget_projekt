@@ -97,11 +97,45 @@ A felhasználó számára egy **webes felület** biztosítja:
 ---
 
 ## 6. Képernyőtervek
+### DESKTOP nézet
+- DESKTOP Kiadások (főoldal): 
+    - Új nap hozzáadása,
+    - Meglévő nap szerkesztése/törlése,
+    - (opcionális) Havi limit beállítása
 
-[@TODO]
-- Kiadások (főoldal): bevitel űrlap + kiadások megjelenítése
-- Elemzés oldal: grafikonos összegzés  
-- Mobil nézet: reszponzív layout, menük (collapse)
+![image](./pics/1_DESKTOP_kiadasok_wireframe.png)
+
+- DESKTOP Elemzés oldal
+    - grafikonos összegzés (oszlop- ill. kördiagram)
+
+![image](./pics/2_DESKTOP_elemzes_wireframe.png)
+
+- DESKTOP AI oldal
+
+![image](./pics/3_DESKTOP_AI_wireframe.png)
+
+
+### MOBIL nézet
+
+- MOBIL Navigációs menü
+
+![image](./pics/M_MOBIL_menu_wireframe.png)
+
+- MOBIL Kiadások (főoldal)
+
+![image](./pics/1_MOBIL_kiadasok_wireframe.png)
+
+- MOBIL Elemzés
+
+![image](./pics/2_MOBIL_elemzes_wireframe.png)
+
+- MOBIL AI
+
+![image](./pics/3_MOBIL_AI_wireframe.png)
+
+- MOBIL Limit beállítása (NAV. MENÜBŐL ÉRHETŐ EL)
+
+![image](./pics/O_MOBIL_limit_wireframe.png)
 
 ---
 
