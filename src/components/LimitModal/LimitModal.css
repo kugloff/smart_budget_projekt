@@ -1,0 +1,83 @@
+.modal-overlay{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(30,58,138,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content{
+  background: white;
+  padding: 20px 30px;
+  border-radius: 16px;
+  min-width: 400px;
+}
+
+.modal-title{
+  text-align: left;
+  margin-bottom: 30px;
+  font-size: 22px;
+  font-weight: 100;
+}
+
+.modal-input-container{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 40px;
+}
+
+.modal-input{
+  border: none;
+  padding: 5px 10px;
+  text-align: right;
+  width: 150px;
+  font-size: 30px;
+  cursor: text;
+}
+
+.modal-input::placeholder {
+  color: #ccc;
+}
+
+.modal-currency{
+  font-weight: 100;
+  font-size: 30px;
+}
+
+.modal-buttons{
+  display: flex;
+  justify-content: space-between;
+}
+
+.modal-buttons button{
+  padding: 5px 15px;
+  cursor: pointer;
+  border-radius: 16px;
+  width: 46%;
+  height: 50px;
+  font-size: 18px;
+  font-weight: 100;
+}
+
+.save-button{
+  border: 1px solid white;
+  background-color: #1E3A8A;
+  color: white;
+}
+
+.close-button{
+  border: 1px solid #1E3A8A;
+  background-color: white;
+  color: #1E3A8A;
+}
+
+.modal-buttons button:hover{
+  opacity: 0.9;
+}
