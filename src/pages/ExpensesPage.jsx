@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { LimitModal } from '../components/LimitModal/LimitModal';
 
-export const ExpensesPage = () => {
+export default function ExpensesPage(){
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [limit, setLimit] = useState(0);
 

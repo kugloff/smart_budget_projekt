@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Navbar } from './components/Navbar/Navbar';
 import { Footer } from './components/Footer/Footer';
 import LoginPage from './pages/LoginPage';
-import { ExpensesPage } from './pages/ExpensesPage';
+import ExpensesPage from './pages/ExpensesPage';
 import AnalysisPage from './pages/AnalysisPage';
 import AIAssistantPage from './pages/AIAssistantPage';
 
