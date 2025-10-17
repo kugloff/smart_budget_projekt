@@ -14,17 +14,6 @@ export default function ExpensesPage(){
   };
 
   return (
-    <div>
-      <h2>Kiadások</h2>
-      <button onClick={openModal}>Költési limit beállítása</button>
-
-      <LimitModal 
-        isOpen={isModalOpen} 
-        onClose={closeModal} 
-        onSave={saveLimit} 
-        limit={limit} 
-        setLimit={setLimit} 
-      />
-    </div>
+    <div>expenses oldal</div>
   );
 };

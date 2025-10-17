@@ -21,10 +21,13 @@ html, body, #root{
 
 body{
   background: #1E3A8A;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
 }
 
 main{
   flex: 1;
+  overflow-y: auto;
 }
 
 a{
@@ -37,4 +40,10 @@ a{
 .container{
   padding-left: 1%;
   padding-right: 1%;
+}
+
+.view-container{
+  padding-left: 5%;
+  padding-right: 5%;
+  height: 100vh;
 }

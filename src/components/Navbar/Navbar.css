@@ -4,10 +4,10 @@ nav{
     width: 100%;
     padding: 10px 0;
     background: #fff;
-    position: fixed;
+    position: sticky;
     top: 0;
-    left: 0;
     z-index: 10;
+
 }
 
 .top-row{
@@ -65,14 +65,16 @@ nav{
     cursor: pointer;
     font-weight: 100;
     font-size: 16px;
-    visibility: hidden;
 }
 
 .new-day-button:hover{
     background-color: #0056b3;
 }
 
-.new-day-button.visible{
+.hidden{
+    visibility: hidden;
+}
+.visible{
   visibility: visible;
 }
 

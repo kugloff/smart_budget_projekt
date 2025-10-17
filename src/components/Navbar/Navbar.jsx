@@ -8,15 +8,15 @@ export const Navbar = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [limit, setLimit] = useState(0);
 
-  const isHome = location.pathname === '/' || location.pathname === '';
+  const isLoggingIn =  location.pathname === '/smart_budget_projekt/';
 
   return (
     <nav className='container'>
       <div className='top-row'>
-        <ul className='left'>
-          <li className={isHome ? 'active' : ''}><Link to="/">Kiadások</Link></li>
+        <ul className={`left ${isLoggingIn ? 'hidden' : 'visible'}`}>
+          <li className={location.pathname === '/expenses' ? 'active' : ''}><Link to="/expenses">Kiadások</Link></li>
           <li className={location.pathname === '/analysis' ? 'active' : ''}><Link to="/analysis">Elemzés</Link></li>
-           {isHome && (
+           {location.pathname === '/expenses' && (
             <li className='limit-button' onClick={() => setIsModalOpen(true)}>
               Költési limit beállítása
             </li>
@@ -25,18 +25,18 @@ export const Navbar = () => {
 
         <h1>SmartBudget</h1>
 
-        <ul className='right'>
+        <ul className={`right ${isLoggingIn ? 'hidden' : 'visible'}`}>
           <li className={location.pathname === '/ai' ? 'active' : ''}><Link to="/ai">AI-alapú tanácsadás</Link></li>
         </ul>
       </div>
 
       <div className='bottom-row'>
-        <button className={`new-day-button ${isHome ? 'visible' : 'hidden'}`}>Új nap hozzáadása</button>
+        <button className={`new-day-button ${location.pathname === '/expenses' ? 'visible' : 'hidden'}`}>Új nap hozzáadása</button>
         <span className='status'>
-          {isHome ? 'Kiadások' :
-           location.pathname === '/analysis' ? 'Elemzés' :
-           location.pathname === '/ai' ? 'AI-alapú tanácsadás' :
-           location.pathname === '/login' ? 'Bejelentkezés' : ''}
+          {location.pathname === '/smart_budget_projekt/' ? 'Bejelentkezés / Regisztráció' :
+            location.pathname === '/expenses' ? 'Kiadások' :
+            location.pathname === '/analysis' ? 'Elemzés' :
+            location.pathname === '/ai' ? 'AI-alapú tanácsadás' : '' }
         </span>
       </div>
 

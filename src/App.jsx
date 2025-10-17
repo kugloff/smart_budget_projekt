@@ -13,7 +13,8 @@ const App = () => {
       <Navbar/>
       <main>
         <Routes>
-          <Route path="/" element={<ExpensesPage />} />
+          <Route path="/smart_budget_projekt/" element={<LoginPage />} />
+          <Route path="/expenses" element={<ExpensesPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/analysis" element={<AnalysisPage />} />
           <Route path="/ai" element={<AIAssistantPage />} />
