@@ -1,13 +1,10 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; //IDEIGLENES
 import "./LoginPage.css";
 
 export default function LoginPage(){
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [registerData, setRegisterData] = useState({ name: "", email: "", password: "", confirm: "" });
 
-  //IDEIGLENES
-  const navigate = useNavigate();
 
   const handleLoginChange = (e) => {
     setLoginData({ ...loginData, [e.target.name]: e.target.value });
@@ -17,10 +14,11 @@ export default function LoginPage(){
     setRegisterData({ ...registerData, [e.target.name]: e.target.value });
   };
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    navigate("/expenses");
-  };
+const handleLogin = (e) => {
+  e.preventDefault();
+  // Átirányítás Flask route-ra
+  window.location.href = "/expenses";
+};
 
   const handleRegister = (e) => {
     e.preventDefault();
