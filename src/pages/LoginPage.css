@@ -22,6 +22,7 @@
     color: black;
     font-weight: 100;
     font-size: 30px;
+    font-weight: 200;
 }
 
 .form-box form{
@@ -34,8 +35,9 @@
 .form-box input{
     padding: 10px 12px;
     font-size: 18px;
+    font-weight: 400;
     border: 1px solid #ccc;
-    outline: 2px solid #1E3A8A;
+    outline: 1px solid #1E3A8A;
     border-radius: 16px;
     transition: border 0.2s;
     height: 50px;
@@ -43,7 +45,7 @@
 }
 
 .form-box input:focus{
-    outline: 3px solid #1E3A8A;
+    outline: 2px solid #1E3A8A;
     transition: outline 0.1s;
 }
 
@@ -54,6 +56,7 @@
     cursor: pointer;
     transition: background 0.3s;
     font-size: 20px;
+    font-weight: 300;
 }
 
 .form-box.left button{

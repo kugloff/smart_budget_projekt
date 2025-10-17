@@ -22,7 +22,7 @@
   text-align: left;
   margin-bottom: 30px;
   font-size: 22px;
-  font-weight: 100;
+  font-weight: 300;
 }
 
 .modal-input-container{
@@ -39,6 +39,7 @@
   text-align: right;
   width: 150px;
   font-size: 30px;
+  font-weight: 300;
   cursor: text;
 }
 
@@ -47,7 +48,7 @@
 }
 
 .modal-currency{
-  font-weight: 100;
+  font-weight: 500;
   font-size: 30px;
 }
 
@@ -63,7 +64,7 @@
   width: 46%;
   height: 50px;
   font-size: 18px;
-  font-weight: 100;
+  font-weight: 300;
 }
 
 .save-button{

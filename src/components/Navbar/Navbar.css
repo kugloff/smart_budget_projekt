@@ -20,8 +20,8 @@ nav{
 .top-row h1{
     text-align: center;
     font-size: 40px;
-    font-weight: 100;
-    letter-spacing: 3px;
+    font-weight: 400;
+    letter-spacing: 2px;
 }
 
 .top-row ul{
@@ -34,7 +34,7 @@ nav{
 
 .top-row ul li{
     font-size: 20px;
-    font-weight: 100;
+    font-weight: 300;
     letter-spacing: 0.5px;
     min-width: 100px;
 }
@@ -63,7 +63,7 @@ nav{
     border: none;
     border-radius: 18px;
     cursor: pointer;
-    font-weight: 100;
+    font-weight: 300;
     font-size: 16px;
 }
 
@@ -71,17 +71,17 @@ nav{
     background-color: #0056b3;
 }
 
+.bottom-row span{
+    font-size: 30px;
+    font-weight: 300;
+    justify-self: center;
+}
+
 .hidden{
     visibility: hidden;
 }
 .visible{
   visibility: visible;
-}
-
-.bottom-row span{
-    font-size: 30px;
-    font-weight: 100;
-    justify-self: center;
 }
 
 .active a{
