@@ -1,15 +1,20 @@
 .view-container{
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: flex-start;
+    gap: 40px;
+    flex-wrap: wrap;
+    min-height: 100vh;
+    padding: 40px 0;
 }
 
 .form-box{
     width: 45%;
+    max-width: 500px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin: 50px auto;
+    margin: 0;
     background: white;
     padding: 20px;
     border-radius: 12px;
@@ -30,6 +35,7 @@
     flex-direction: column;
     width: 100%;
     gap: 15px;
+    
 }
 
 .form-box input{
