@@ -27,7 +27,7 @@ export default function LoginPage(){
   };
 
   return (
-    <div className="view-container">
+    <div className="login-view-container">
       <div className="form-box left">
         <h2>Bejelentkezés</h2>
         <form onSubmit={handleLogin}>

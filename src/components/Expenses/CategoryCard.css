@@ -1,0 +1,49 @@
+.category-card{
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    border: 2px solid #1E3A8A;
+    border-radius: 16px;
+}
+
+.category-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.category-left{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.color-dot{
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.category-name{
+    font-weight: 500;
+    font-size: 16px;
+    color: #000;
+}
+
+.category-total{
+    font-weight: 900;
+    font-size: 16px;
+    min-width: 120px;
+    margin-right: 10px;
+    text-align: right;
+    color: #1E3A8A;
+}
+
+.category-entries{
+    display: flex;
+    flex-direction: column;
+    margin-left: 22px;
+    gap: 5px;
+}

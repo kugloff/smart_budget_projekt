@@ -1,0 +1,56 @@
+.day-card{
+    width: 100%;
+    background: white;
+    border-radius: 16px;
+    margin-bottom: 16px;
+    padding: 16px;
+}
+
+.day-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.day-info{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.day-category-dots{
+    display: flex;
+    gap: 6px;
+    margin-left: 8px;
+}
+
+.small-dot{
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.day-actions-total{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.day-total{
+    font-weight: 500;
+    color: #000;
+    margin-right: 12px;
+}
+
+.day-actions-total button{
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.day-content{
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
