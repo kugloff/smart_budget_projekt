@@ -2,7 +2,7 @@
 chcp 65001
 cd backend
 
-set /p "bemenet=Szeretnéd Buildenli a fontendet? Ha igen 1: "
+set /p "bemenet=Szeretnéd buildelni a frontendet? igen(1)/nem(Enter): "
 
 if "%bemenet%"=="1" (
 	cd ../frontend
