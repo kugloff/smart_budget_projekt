@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './Navbar.css';
 import { LimitModal } from '../LimitModal/LimitModal';
 
-export const Navbar = () => {
+export const Navbar = ({ onOpenAddDayModal }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [limit, setLimit] = useState(0);
 
@@ -20,10 +20,7 @@ export const Navbar = () => {
             <a href="/analysis">Elemzés</a>
           </li>
           {currentPage === 'expenses' && (
-            <li
-              className="limit-button"
-              onClick={() => setIsModalOpen(true)}
-            >
+            <li className="limit-button" onClick={() => setIsModalOpen(true)}>
               Költési limit beállítása
             </li>
           )}
@@ -39,13 +36,18 @@ export const Navbar = () => {
       </div>
 
       <div className="bottom-row">
-        <button
-          className={`new-day-button ${
-            currentPage === 'expenses' ? 'visible' : 'hidden'
-          }`}
-        >
-          Új nap hozzáadása
-        </button>
+        <div className="placeholder">
+          {currentPage === 'expenses' ? (
+            <button
+              className="new-day-button visible"
+              onClick={onOpenAddDayModal}
+            >
+              Új nap hozzáadása
+            </button>
+          ) : (
+            <span style={{ visibility: 'hidden' }}>Placeholder</span>
+          )}
+        </div>
 
         <span className="status">
           {currentPage === 'login'
