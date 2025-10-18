@@ -1,3 +1,45 @@
+# Python cache fájlok
+__pycache__/
+*.py[cod]
+
+# Pip és Node csomagok
+*.egg-info/
+*.egg
+*.lock
+package-lock.json
+
+# IDE-k és editorok
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS fájlok
+.DS_Store
+Thumbs.db
+
+# Logok
+*.log
+
+# Bytecode / compiled files
+*.so
+*.pyd
+*.dll
+
+# PyInstaller
+dist/
+build/
+
+# Coverage
+htmlcov/
+.coverage
+
+# Mypy
+.mypy_cache/
+
+# Test results
+pytest_cache/
+
 # Logs
 logs
 *.log
