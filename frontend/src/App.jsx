@@ -10,7 +10,7 @@ const App = () => {
   let PageComponent;
 
   // Flask által beállított page prop alapján választunk
-  switch(window.REACT_PAGE) {
+  switch(window.REACT_PAGE){
     case 'expenses':
       PageComponent = ExpensesPage;
       break;
@@ -20,7 +20,6 @@ const App = () => {
     case 'ai':
       PageComponent = AIAssistantPage;
       break;
-    case 'login':
     default:
       PageComponent = LoginPage;
   }
