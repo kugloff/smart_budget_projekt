@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ChevronDown, ChevronUp, Trash2, Edit3, Save } from "lucide-react";
+import { ChevronDown, ChevronUp, Trash2, Edit3, Save, X } from "lucide-react";
 import { CategoryCard } from "./CategoryCard";
 import { DeleteModal } from "../DeleteModal/DeleteModal";
 import "./DayCard.css";
@@ -39,8 +39,12 @@ export const DayCard = ({ initialDate, initialCategories, onDelete }) => {
     setIsEdit(false);
   };
 
+  const handleCancel = () => {
+    setIsEdit(false);
+  };
+
   return (
-    <div className="day-card">
+    <div className={`day-card ${isEdit ? "editing" : ""}`}>
       <div className="day-header">
         <div className="day-info">
           {isEdit ? (
@@ -60,11 +64,19 @@ export const DayCard = ({ initialDate, initialCategories, onDelete }) => {
         <div className="day-actions-total">
           <div className="day-total">{dayTotal.toLocaleString()} Ft</div>
 
-          {!isEdit && <button onClick={handleEditClick}><Edit3 size={20} /></button>}
+          {!isEdit && (
+            <>
+              <button onClick={handleEditClick}><Edit3 size={20} /></button>
+              <button onClick={() => setIsDeleteModalOpen(true)}><Trash2 size={20} /></button>
+            </>
+          )}
 
-          {isEdit && <button onClick={handleSave}><Save size={20} /></button>}
-
-          {!isEdit && <button onClick={() => setIsDeleteModalOpen(true)}><Trash2 size={20} /></button>}
+          {isEdit && (
+            <>
+              <button onClick={handleSave}><Save size={20} /></button>
+              <button onClick={handleCancel}><X size={20} /></button>
+            </>
+          )}
 
           <button onClick={handleToggleOpen}>
             {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
