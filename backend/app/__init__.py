@@ -1,4 +1,5 @@
 from flask import Flask, send_from_directory
+from werkzeug.security import generate_password_hash, check_password_hash # 150-200 karakteres mezőt igényel legalább
 from flask_cors import CORS
 from app.database import db
 from datetime import timedelta
@@ -32,7 +33,7 @@ def create_app():
     })
     CORS(app)
 
-    db.__init__("database.db")
+    db.__init__("database.db") # itt még lesz munka vele
 
     @app.route('/')
     def login():
