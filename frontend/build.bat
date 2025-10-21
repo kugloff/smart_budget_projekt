@@ -14,7 +14,10 @@ if errorlevel 1 (
 ) else (
     echo Success building!
 )
-
-echo Enter az újraépítéshez...
-pause
-goto start
+if "%1"=="hivott" (
+	pause
+) else (
+	echo Enter az újraépítéshez...
+	pause
+	goto start
+)

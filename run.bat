@@ -6,11 +6,11 @@ set /p "bemenet=Szeretnéd buildelni a frontendet? igen(1)/nem(Enter): "
 
 if "%bemenet%"=="1" (
 	cd ../frontend
-	call build.bat
+	call build.bat hivott
 	cd ../backend
 )
 
-call venv\Scripts\activate.bat
+call .venv\Scripts\activate.bat
 if errorlevel 1 (
     echo ERROR: Failed to activate virtual environment!
     pause

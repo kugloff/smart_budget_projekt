@@ -18,7 +18,7 @@ def init_tables() -> dict:
     Tables = {}
 
     # mező sorrenden tilos módosítani, illetve a tábla dict kulcsain is. új mezőt a végére kell tenni.
-    Felhasznalok = TableBluePrint("Felhasznalok")
+    Felhasznalok = TableBluePrint("felhasznalok")
     Felhasznalok.Add_mezo("user_id", TipusConst.VARCHAR, adat_hossz=70, megkotes=MegkotesConst.PK)
     Felhasznalok.Add_mezo("email", TipusConst.VARCHAR, adat_hossz=100, megkotes=MegkotesConst.NN_UK)
     Felhasznalok.Add_mezo("jelszo", TipusConst.VARCHAR, adat_hossz=400, megkotes=MegkotesConst.NN)
@@ -122,7 +122,7 @@ class Database:
               cursor.execute(query, params)
               return cursor.fetchall()
         except sqlite3.Error as e:
-            if error_print: print(f"Hiba a lekérdezés során: {e}")
+            if error_print: print(f"Hiba a lekérdezés során: {e}, query: {query}, params: {params}")
             return []
 
     def fetch_one(self, query:str, params:tuple=(), error_print=True) -> tuple|None: # minta kienet: (adat1, adat2, adat3, ...)
@@ -132,7 +132,7 @@ class Database:
               cursor.execute(query, params)
               return cursor.fetchone()
         except sqlite3.Error as e:
-            if error_print: print(f"Hiba a lekérdezés során: {e}")
+            if error_print: print(f"Hiba a lekérdezés során: {e}, query: {query}, params: {params}")
             return None
 
     def build_database(self):
@@ -214,6 +214,3 @@ class Database:
         return self.egyszeru_select("felhasznalok",where_mezo, where_adat, van_adat)
     def select_napi_koltesek(self, where_mezo:int, where_adat, van_adat:bool=False) -> tuple|bool|None:
         return self.egyszeru_select("napi_koltesek",where_mezo, where_adat, van_adat)
-
-db_path = os.path.join(os.path.dirname(__file__), "database.db")
-db = Database(db_path)
