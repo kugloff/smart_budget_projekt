@@ -26,10 +26,9 @@ def init_tables() -> dict:
     Tables["felhasznalok"] = Felhasznalok
 
     napi_koltesek = TableBluePrint("napi_koltesek")
-    napi_koltesek.Add_mezo("user_id", TipusConst.VARCHAR, adat_hossz=70)
-    napi_koltesek.Add_mezo("kategoria_csoport_id", TipusConst.INTEGER, megkotes=MegkotesConst.NN)
+    napi_koltesek.Add_mezo("user_id", TipusConst.VARCHAR, adat_hossz=70, megkotes=MegkotesConst.NN)
+    napi_koltesek.Add_mezo("kategoria_csoport_id", TipusConst.INTEGER, megkotes=MegkotesConst.PK)
     napi_koltesek.Add_mezo("datum", TipusConst.DATE, megkotes=MegkotesConst.NN)
-    napi_koltesek.Add_Table_PK(0, 1)
     napi_koltesek.Add_Table_FK(0, Felhasznalok, 0, True)
     napi_koltesek.Table_megkotes(f"UNIQUE({napi_koltesek.mezonevek[0]}, {napi_koltesek.mezonevek[2]})")
     Tables["napi_koltesek"] = napi_koltesek
@@ -41,20 +40,18 @@ def init_tables() -> dict:
     Tables["kategoria_nevek"] = kategoria_nevek
 
     koltesi_kategoriak = TableBluePrint("koltesi_kategoriak")
-    koltesi_kategoriak.Add_mezo("kategoria_csoport_id", TipusConst.INTEGER)
-    koltesi_kategoriak.Add_mezo("koltes_id", TipusConst.INTEGER)
+    koltesi_kategoriak.Add_mezo("kategoria_csoport_id", TipusConst.INTEGER, megkotes=MegkotesConst.NN)
+    koltesi_kategoriak.Add_mezo("koltes_id", TipusConst.INTEGER, megkotes=MegkotesConst.PK)
     koltesi_kategoriak.Add_mezo("kategoria_nev_id", TipusConst.INTEGER, megkotes=MegkotesConst.NN)
-    koltesi_kategoriak.Add_Table_PK(0, 1)
     koltesi_kategoriak.Add_Table_FK(0, napi_koltesek, 1, True)
     koltesi_kategoriak.Add_Table_FK(2, kategoria_nevek, 0)
     Tables["koltesi_kategoriak"] = koltesi_kategoriak
 
     koltesek = TableBluePrint("koltesek")
-    koltesek.Add_mezo("id", TipusConst.INTEGER)
-    koltesek.Add_mezo("koltes_id", TipusConst.INTEGER)
+    koltesek.Add_mezo("id", TipusConst.INTEGER, megkotes=MegkotesConst.PK)
+    koltesek.Add_mezo("koltes_id", TipusConst.INTEGER, megkotes=MegkotesConst.NN)
     koltesek.Add_mezo("leiras", TipusConst.VARCHAR, adat_hossz=100)
     koltesek.Add_mezo("osszeg", TipusConst.INTEGER, megkotes=MegkotesConst.NN)
-    koltesek.Add_Table_PK(0, 1)
     koltesek.Add_Table_FK(1, koltesi_kategoriak, 1, True)
     Tables["koltesek"] = koltesek
 
@@ -92,7 +89,7 @@ class TableBluePrint:
         return f"UPDATE {self.table_name} SET {self.mezonevek[edit_mezo]} = ? WHERE {self.mezonevek[where_mezo]} = ?"
 
     def ToDELETE_FROM(self, where_mezo:int) -> str:
-        return f"DELETE FROM {self.table_name} WHERE {self.mezonevek[where_mezo]}"
+        return f"DELETE FROM {self.table_name} WHERE {self.mezonevek[where_mezo]} = ?"
 
 class Database:
     def __init__(self, db_path):
@@ -116,7 +113,7 @@ class Database:
             return str(e) if return_integritas_error else False
         except sqlite3.Error as e:
             if error_print and not return_integritas_error: print(f"Hiba az adatbázis művelet során: {e}, query: {query}, params: {params}")
-            return False
+            return str(e)
 
     def fetch_all(self, query:str, params:tuple=(), error_print=True) -> list: # minta kimenet [(adat1, adat2, ...), (adat1, adat2, ...), (...), ...]
         try:
@@ -143,8 +140,14 @@ class Database:
             self.execute(tabla_blueprint.ToSQL())
 
     def rebuild_database(self):
+        with self.connect() as conn:
+            cursor = conn.cursor()
+            cursor.execute("PRAGMA foreign_keys = OFF;")
+            for tabla_blueprint in self.tables.values():
+                cursor.execute(f"DROP TABLE IF EXISTS {tabla_blueprint.table_name}")
+            cursor.execute("PRAGMA foreign_keys = ON;")
+            conn.commit()
         for tabla_blueprint in self.tables.values():
-            self.execute(f"DROP TABLE IF EXISTS {tabla_blueprint.table_name}")
             self.execute(tabla_blueprint.ToSQL())
 
     def print_database_shema(self):
@@ -153,7 +156,7 @@ class Database:
     # felhasználók kezelése
     def add_felhasznalo(self, user_id:str, email:str, jelszo_hash:str) -> bool:
         table_blueprint: TableBluePrint = self.tables["felhasznalok"]
-        return self.execute(table_blueprint.ToINSERT_INTO(3), (user_id, email, jelszo_hash), error_print=False)
+        return self.execute(table_blueprint.ToINSERT_INTO(4), (user_id, email, jelszo_hash, None), error_print=False)
     def edit_felhasznalo(self, user_id:str, koltesi_limit:int|None) -> bool:
         table_blueprint: TableBluePrint = self.tables["felhasznalok"]
         return self.execute(table_blueprint.ToUPDATE_TABLE(3, 0), (koltesi_limit, user_id), error_print=False)
@@ -170,7 +173,7 @@ class Database:
     # költési kategóriák kezelése
     def add_koltesi_kategoria(self, kategoria_csoport_id:int, kategoria_nev_id:int) -> bool|str|None:
         table_blueprint: TableBluePrint = self.tables["koltesi_kategoriak"]
-        return self.execute(table_blueprint.ToINSERT_INTO(3), (None, kategoria_csoport_id, kategoria_nev_id), return_integritas_error=True)
+        return self.execute(table_blueprint.ToINSERT_INTO(3), (kategoria_csoport_id, None, kategoria_nev_id), return_integritas_error=True)
     def edit_koltesi_kategoria(self, koltes_id:int, kategoria_nev_id:int) -> bool|str|None:
         table_blueprint: TableBluePrint = self.tables["koltesi_kategoriak"]
         return self.execute(table_blueprint.ToUPDATE_TABLE(2, 0), (kategoria_nev_id, koltes_id), return_integritas_error=True)
@@ -192,13 +195,13 @@ class Database:
 
     # kategoria nevek kezelése
     def add_kategoria_nev(self, nev:str, szinkod:str) -> bool:
-        table_blueprint: TableBluePrint = self.tables["Kategoria_nevek"]
+        table_blueprint: TableBluePrint = self.tables["kategoria_nevek"]
         return self.execute(table_blueprint.ToINSERT_INTO(3), (None, nev, szinkod), error_print=False)
     def edit_kategoria_nev(self, edit_mezo:int, edit_value, where_vaule:int) -> bool:
-        table_blueprint: TableBluePrint = self.tables["Kategoria_nevek"]
+        table_blueprint: TableBluePrint = self.tables["kategoria_nevek"]
         return self.execute(table_blueprint.ToUPDATE_TABLE(edit_mezo, 0), (edit_value, where_vaule), error_print=False)
     def delete_kategoria_nev(self, where_mezo:int, where_vaule:int):
-        table_blueprint: TableBluePrint = self.tables["Kategoria_nevek"]
+        table_blueprint: TableBluePrint = self.tables["kategoria_nevek"]
         return self.execute(table_blueprint.ToDELETE_FROM(where_mezo), (where_vaule,), error_print=False)
 
     # különböző lekérések
