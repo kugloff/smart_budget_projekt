@@ -1,72 +1,70 @@
-.category-card{
-    display: flex;
-    flex-direction: column;
-    padding: 10px;
-    border: 2px solid #1E3A8A;
-    border-radius: 16px;
-    background: #fafafa;
-    transition: background 0.2s ease;
+.category-card {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  border: 2px solid #1e3a8a;
+  border-radius: 16px;
+  background: #fafafa;
+  transition: background 0.2s ease;
 }
 
-.category-card:hover{
-    background: #f0f8ff;
+.category-card:hover {
+  background: #f0f8ff;
 }
 
-.category-header{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 5px;
+.category-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
 }
 
-.category-left{
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.category-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.color-dot{
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    display: inline-block;
-    border: 1px solid #ccc;
+.color-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: inline-block;
+  border: 1px solid #ccc;
 }
 
-.category-name{
-    font-weight: 500;
-    font-size: 16px;
-    color: #000;
+.category-name {
+  font-weight: 500;
+  font-size: 16px;
+  color: #000;
 }
 
-.category-total{
-    font-weight: 900;
-    font-size: 16px;
-    min-width: 120px;
-    margin-right: 10px;
-    text-align: right;
-    color: #1E3A8A;
+.category-total {
+  font-weight: 900;
+  font-size: 16px;
+  min-width: 120px;
+  margin-right: 10px;
+  text-align: right;
+  color: #1e3a8a;
 }
 
-.category-entries{
-    display: flex;
-    flex-direction: column;
-    margin-left: 22px;
-    gap: 5px;
+.category-entries {
+  display: flex;
+  flex-direction: column;
+  margin-left: 22px;
+  gap: 5px;
 }
 
-.category-left input[type="text"]{
-    font-size: 16px;
-    padding: 2px 6px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
+.category-select {
+  font-size: 16px;
+  padding: 2px 6px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  color: #000;
 }
 
-.category-left input[type="color"]{
-    width: 28px;
-    height: 28px;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    border-radius: 50%;
+.category-select:focus {
+  outline: none;
+  border-color: #1e3a8a;
 }

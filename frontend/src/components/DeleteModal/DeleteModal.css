@@ -48,17 +48,17 @@
 }
 
 .delete-button{
-  border: 1px solid white;
-  background-color: #1E3A8A;
-  color: white;
+    border: 1px solid white;
+    background-color: #1E3A8A;
+    color: white;
 }
 
 .close-button{
-  border: 1px solid #1E3A8A;
-  background-color: white;
-  color: #1E3A8A;
+    border: 1px solid #1E3A8A;
+    background-color: white;
+    color: #1E3A8A;
 }
 
 .modal-buttons button:hover{
-  opacity: 0.9;
+    opacity: 0.9;
 }

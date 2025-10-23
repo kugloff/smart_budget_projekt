@@ -5,20 +5,39 @@ import "./CategoryCard.css";
 export const CategoryCard = ({ category, isEditing, onUpdateCategory }) => {
   const [editedCategory, setEditedCategory] = useState({ ...category });
 
+  // kategóriák és színek (később adatbázisból)
+  const categoryColors = {
+    Étel: "#FF6B6B",
+    Közlekedés: "#4ECDC4",
+    Szórakozás: "#FFD93D",
+    Számlák: "#1E90FF",
+    Bevásárlás: "#9B59B6",
+    Egyéb: "#95A5A6"
+  };
+
+  const availableCategories = Object.keys(categoryColors);
+
   const categoryTotal = editedCategory.entries.reduce(
     (sum, entry) => sum + Number(entry.amount),
     0
   );
 
-  const handleChange = (field, value) => {
-    const updated = { ...editedCategory, [field]: value };
+  const handleCategoryChange = (value) => {
+    const updated = {
+      ...editedCategory,
+      name: value,
+      color: categoryColors[value] || "#cccccc"
+    };
     setEditedCategory(updated);
     onUpdateCategory(updated);
   };
 
   const handleEntryChange = (index, field, value) => {
     const newEntries = [...editedCategory.entries];
-    newEntries[index] = { ...newEntries[index], [field]: field === "amount" ? Number(value) : value };
+    newEntries[index] = {
+      ...newEntries[index],
+      [field]: field === "amount" ? Number(value) : value
+    };
     const updated = { ...editedCategory, entries: newEntries };
     setEditedCategory(updated);
     onUpdateCategory(updated);
@@ -28,31 +47,31 @@ export const CategoryCard = ({ category, isEditing, onUpdateCategory }) => {
     <div className="category-card">
       <div className="category-header">
         <div className="category-left">
-          {isEditing ? (
-            <input
-              type="color"
-              value={editedCategory.color}
-              onChange={(e) => handleChange("color", e.target.value)}
-              style={{ width: "25px", height: "25px", marginRight: "5px", border: "none" }}
-            />
-          ) : (
-            <span
-              className="color-dot"
-              style={{ backgroundColor: editedCategory.color }}
-            ></span>
-          )}
+          <span
+            className="color-dot"
+            style={{ backgroundColor: editedCategory.color }}
+          ></span>
 
           {isEditing ? (
-            <input
-              type="text"
+            <select
               value={editedCategory.name}
-              onChange={(e) => handleChange("name", e.target.value)}
-            />
+              onChange={(e) => handleCategoryChange(e.target.value)}
+              className="category-select"
+            >
+              {availableCategories.map((cat, i) => (
+                <option key={i} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
           ) : (
             <span className="category-name">{editedCategory.name}</span>
           )}
         </div>
-        <span className="category-total">{categoryTotal.toLocaleString()} Ft</span>
+
+        <span className="category-total">
+          {categoryTotal.toLocaleString()} Ft
+        </span>
       </div>
 
       <div className="category-entries">
@@ -61,7 +80,9 @@ export const CategoryCard = ({ category, isEditing, onUpdateCategory }) => {
             key={i}
             entry={entry}
             isEditing={isEditing}
-            onEntryChange={(field, value) => handleEntryChange(i, field, value)}
+            onEntryChange={(field, value) =>
+              handleEntryChange(i, field, value)
+            }
           />
         ))}
       </div>
