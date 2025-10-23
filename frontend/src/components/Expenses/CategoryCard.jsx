@@ -5,7 +5,7 @@ import "./CategoryCard.css";
 export const CategoryCard = ({ category, isEditing, onUpdateCategory }) => {
   const [editedCategory, setEditedCategory] = useState({ ...category });
 
-  // kategóriák és színek (később adatbázisból)
+  // Példa: kategóriák és színek (később adatbázisból)
   const categoryColors = {
     Étel: "#FF6B6B",
     Közlekedés: "#4ECDC4",
@@ -22,11 +22,13 @@ export const CategoryCard = ({ category, isEditing, onUpdateCategory }) => {
     0
   );
 
+  //itt: ha nem választ a user kategóriát, akkor alapból az egyébbe dobja
   const handleCategoryChange = (value) => {
+    const finalValue = value || "Egyéb";
     const updated = {
       ...editedCategory,
-      name: value,
-      color: categoryColors[value] || "#cccccc"
+      name: finalValue,
+      color: categoryColors[finalValue] || "#cccccc"
     };
     setEditedCategory(updated);
     onUpdateCategory(updated);
@@ -58,6 +60,7 @@ export const CategoryCard = ({ category, isEditing, onUpdateCategory }) => {
               onChange={(e) => handleCategoryChange(e.target.value)}
               className="category-select"
             >
+              <option value="">Válassz kategóriát</option>
               {availableCategories.map((cat, i) => (
                 <option key={i} value={cat}>
                   {cat}

@@ -8,12 +8,12 @@ export const EntryItem = ({ entry, isEditing, onEntryChange }) => {
         <>
           <input
             type="text"
-            value={entry.description}
+            placeholder={entry.description}
             onChange={(e) => onEntryChange("description", e.target.value)}
           />
           <input
             type="number"
-            value={entry.amount}
+            placeholder={entry.amount}
             onChange={(e) => onEntryChange("amount", e.target.value)}
           />
         </>

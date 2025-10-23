@@ -54,7 +54,6 @@
 	height: 32px;
 	border: none;
 	cursor: pointer;
-	border-radius: 50%;
 }
 
 .delete-btn,
@@ -94,4 +93,8 @@
 	width: 50%;
 	text-align: center;
 	transition: background-color 0.2s ease;
+}
+
+.confirm-message{
+    margin-bottom: 15px;
 }
