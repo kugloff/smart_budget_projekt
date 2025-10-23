@@ -77,7 +77,8 @@ class TableBluePrint:
         self.create_sorok.append({"sql":"\t"+megkotes, "hossz":0})
 
     def ToSQL(self) -> str:
-        return f"CREATE TABLE IF NOT EXISTS {self.table_name} (\n{",\n".join([i['sql'] for i in self.create_sorok])}\n)"
+        return f"CREATE TABLE IF NOT EXISTS {self.table_name} (\n" + ",\n".join([i['sql'] for i in self.create_sorok]) + "\n)"
+
 
     def ToDROP_TABLE(self) -> str:
         return f"DROP TABLE IF EXISTS {self.table_name}"
