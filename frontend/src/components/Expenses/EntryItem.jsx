@@ -1,21 +1,29 @@
 import React from "react";
-import "./EntryItem.css";
+import { Trash2 } from "lucide-react";
+import "./DayCard.css";
 
-export const EntryItem = ({ entry, isEditing, onEntryChange }) => {
-  return (
-    <div className="entry-item">
+export const EntryItem = ({ entry, isEditing, onEntryChange, onDelete }) => {
+	return (
+		<div className="entry-item-container">
       {isEditing ? (
         <>
           <input
             type="text"
+            value=""
             placeholder={entry.description}
-            onChange={(e) => onEntryChange("description", e.target.value)}
+            className="entry-description-input"
+            onChange={e=>onEntryChange("description",e.target.value)}
           />
           <input
             type="number"
-            placeholder={entry.amount}
-            onChange={(e) => onEntryChange("amount", e.target.value)}
+            defaultValue={entry.amount || ""}
+            placeholder="Összeg"
+            onChange={e => onEntryChange("amount", e.target.value)}
+            className="entry-amount-input"
           />
+          <button className="delete-entry-btn" onClick={onDelete}>
+            <Trash2 size={16}/>
+          </button>
         </>
       ) : (
         <>
@@ -24,5 +32,5 @@ export const EntryItem = ({ entry, isEditing, onEntryChange }) => {
         </>
       )}
     </div>
-  );
+	);
 };

@@ -24,16 +24,26 @@
 }
 
 .add-modal-input-container{
-    border: 1px solid #1E3A8A;
-    padding: 10px;
-    margin-bottom: 20px;
-    border-radius: 16px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 10px;
+	border: 1px solid #1E3A8A;
+	padding: 10px;
+	margin-bottom: 20px;
+	border-radius: 16px;
 }
 
-.add-modal-input-container input{
-  cursor: pointer;
-  margin-left: 10px;
-  border-radius: 8px;
-  border: 1px solid black;
-  padding: 5px;
+.add-modal-input-container label{
+	margin: 0;
+}
+
+.add-modal-input-container input[type="date"]{
+	width: 200px;
+	border-radius: 8px;
+	border: 1px solid #1E3A8A;
+	padding: 5px;
+	cursor: pointer;
+	box-sizing: border-box;
+	margin: 0;
 }
