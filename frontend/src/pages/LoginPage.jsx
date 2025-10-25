@@ -4,7 +4,8 @@ import "./LoginPage.css";
 export default function LoginPage() {
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [registerData, setRegisterData] = useState({ name: "", email: "", password: "", confirm: "" });
-  const [message, setMessage] = useState(""); // üzenetek megjelenítésére
+  const [loginMessage, setLoginMessage] = useState("");
+  const [registerMessage, setRegisterMessage] = useState("");
 
   const handleLoginChange = (e) => {
     setLoginData({ ...loginData, [e.target.name]: e.target.value });
@@ -16,7 +17,7 @@ export default function LoginPage() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setMessage("");
+    setLoginMessage("");
     try {
       const res = await fetch("/login", {
         method: "POST",
@@ -27,22 +28,22 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (res.ok && data.success) {
-        setMessage(data.message || "Sikeres bejelentkezés!");
+        setLoginMessage("✅ Sikeres bejelentkezés!");
         window.location.href = "/expenses";
       } else {
-        setMessage(data.message || "Bejelentkezés sikertelen!");
+        setLoginMessage(data.message || "❌ Bejelentkezés sikertelen!");
       }
     } catch (err) {
-      setMessage("Hálózati hiba: nem sikerült csatlakozni a szerverhez.");
-      console.error(err);
+      setLoginMessage("❌ Hálózati hiba: nem sikerült csatlakozni a szerverhez.");
     }
   };
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    setMessage("");
+    setRegisterMessage("");
+
     if (registerData.password !== registerData.confirm) {
-      setMessage("A jelszavak nem egyeznek!");
+      setRegisterMessage("❌ A jelszavak nem egyeznek!");
       return;
     }
 
@@ -56,14 +57,13 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (res.ok && data.success) {
-        setMessage(data.message || "Sikeres regisztráció!");
+        setRegisterMessage("✅ Sikeres regisztráció!");
         window.location.href = "/expenses";
       } else {
-        setMessage(data.message || "Regisztráció sikertelen!");
+        setRegisterMessage(data.message || "❌ Regisztráció sikertelen!");
       }
     } catch (err) {
-      setMessage("Hálózati hiba: nem sikerült csatlakozni a szerverhez.");
-      console.error(err);
+      setRegisterMessage("❌ Hálózati hiba: nem sikerült csatlakozni a szerverhez.");
     }
   };
 
@@ -89,6 +89,12 @@ export default function LoginPage() {
             required
           />
           <button type="submit">Bejelentkezés</button>
+
+          {loginMessage && (
+            <p className={`message ${loginMessage.includes("✅") ? "success" : "error"}`}>
+              {loginMessage}
+            </p>
+          )}
         </form>
       </div>
 
@@ -128,14 +134,14 @@ export default function LoginPage() {
             required
           />
           <button type="submit">Regisztráció</button>
+
+          {registerMessage && (
+            <p className={`message ${registerMessage.includes("✅") ? "success" : "error"}`}>
+              {registerMessage}
+            </p>
+          )}
         </form>
       </div>
-
-      {message && (
-        <div className="message-box">
-          <p>{message}</p>
-        </div>
-      )}
     </div>
   );
 }
