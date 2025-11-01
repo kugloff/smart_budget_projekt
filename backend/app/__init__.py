@@ -40,8 +40,9 @@ def create_app():
         session.clear()
         return serve_react_page('login')
 
-    @app.route('/login', methods=["POST"])
+    @app.route('/login', methods=["POST", "GET"])
     def login():
+        if request.method == "GET": return serve_react_page('login')
         if request.method == "POST":
             try:
                 # --- JSON vagy form POST kezelése ---
@@ -122,7 +123,7 @@ def create_app():
     @app.route('/expenses')
     def expenses():
         if 'user_id' not in session:
-            return jsonify({'error': 'Nincs bejelentkezve!'}), 401
+            return redirect(url_for('login', msg='Nincs bejelentkezve!'))
         return serve_react_page('expenses')
 
     @app.route('/analysis')

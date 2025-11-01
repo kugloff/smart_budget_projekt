@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./LoginPage.css";
 
 export default function LoginPage() {
@@ -6,6 +6,16 @@ export default function LoginPage() {
   const [registerData, setRegisterData] = useState({ name: "", email: "", password: "", confirm: "" });
   const [loginMessage, setLoginMessage] = useState("");
   const [registerMessage, setRegisterMessage] = useState("");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const msg = params.get("msg");
+    if (msg) {
+      setLoginMessage(`❌ ${msg}`);
+      // opcionális: töröld a query-t, hogy újratöltés után ne jelenjen meg újra
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   const handleLoginChange = (e) => {
     setLoginData({ ...loginData, [e.target.name]: e.target.value });

@@ -206,6 +206,9 @@ class Database:
         return self.execute(table_blueprint.ToDELETE_FROM(where_mezo), (where_vaule,), error_print=False)
 
     # különböző lekérések
+    # tuple -> van adat és azt kapjuk vissza
+    # bool -> kizárólag van_adat=True esetében van bool más esetben tuple|None || True ha legalább egy rekordot ad a lekérdezés (minimum 1) || False ha a lekérdezés nem ad vissza semmit
+    # None -> ha a lekérdezés nem adott vissza egyetlen rekordot sem.
     def egyszeru_select(self, tabla_id:str, where_mezo:int, where_adat, van_adat:bool=False) -> tuple|bool|None:
         table_blueprint: TableBluePrint = self.tables[tabla_id]
         eredmeny = self.fetch_one(f"SELECT * FROM {table_blueprint.table_name} WHERE {table_blueprint.mezonevek[where_mezo]}=?",(where_adat,))
