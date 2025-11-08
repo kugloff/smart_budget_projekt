@@ -6,7 +6,7 @@
 .expenses-container{
     width: 100%;
     max-width: 1200px;
-    margin: 20px auto;
+    margin: 20px auto 60px auto;
     display: flex;
     flex-direction: column;
 }
