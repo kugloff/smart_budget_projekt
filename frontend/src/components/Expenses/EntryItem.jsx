@@ -2,26 +2,29 @@ import React from "react";
 import { Trash2 } from "lucide-react";
 import "./DayCard.css";
 
-export const EntryItem = ({ entry, isEditing, onEntryChange, onDelete }) => {
+export const EntryItem = ({ entry, isEditing }) => {
+  // backend - entry.description és entry.amount
+  //         - update, delete
+
   return (
     <div className="entry-item-container">
       {isEditing ? (
         <>
           <input
             type="text"
-            value={entry.description === "Új tétel" ? "" : entry.description}
+            value={entry.description}
             placeholder="Új tétel"
             className="entry-description-input"
-            onChange={e => onEntryChange("description", e.target.value)}
+            disabled
           />
           <input
             type="number"
-            value={entry.amount === 0 ? "" : entry.amount}
+            value={entry.amount}
             placeholder="Összeg"
-            onChange={e => onEntryChange("amount", e.target.value)}
             className="entry-amount-input"
+            disabled
           />
-          <button className="delete-entry-btn" onClick={onDelete}>
+          <button className="delete-entry-btn" disabled>
             <Trash2 size={16} />
           </button>
         </>

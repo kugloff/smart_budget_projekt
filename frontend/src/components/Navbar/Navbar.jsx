@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './Navbar.css';
-import { LimitModal } from '../LimitModal/LimitModal';
-import { CategoryManagerModal } from '../CategoryManagerModal/CategoryManagerModal';
+import { LimitModal } from '../Modals/LimitModal/LimitModal';
+import { CategoryManagerModal } from '../Modals/CategoryManagerModal/CategoryManagerModal';
 
 export const Navbar = ({ onOpenAddDayModal, onLogout }) => {
 	const [isLimitModalOpen, setIsLimitModalOpen] = useState(false);

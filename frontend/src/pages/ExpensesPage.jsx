@@ -2,18 +2,23 @@ import React from "react";
 import { DayCard } from "../components/Expenses/DayCard";
 import "./ExpensesPage.css";
 
-export default function ExpensesPage({ days, removeDay }){
+export default function ExpensesPage(){
+
+  // Backend
+
   return (
     <div className="expenses-view-container">
       <div className="expenses-container">
-        {days.map((day, index) => (
-          <DayCard
-            key={index}
-            initialDate={day.date}
-            initialCategories={day.categories}
-            onDelete={() => removeDay(index)}
-          />
-        ))}
+        {/* DayCard komponensek backendből jövő adatok alapján generálódnak majd 
+          {days.map((day) => (
+            <DayCard
+              key={day.id}
+              initialDate={day.date}
+              initialCategories={day.categories}
+              onDelete={() => handleDelete(day.id)}
+            />
+          ))}
+        */}
       </div>
     </div>
   );
