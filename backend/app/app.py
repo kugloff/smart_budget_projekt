@@ -1,17 +1,14 @@
 from flask import Flask, request, jsonify
 from database import Database
+from flask_cors import CORS
 
 app = Flask(__name__)
-db = Database("koltesek.db")
+CORS(app)
+
+db = Database("database.db")
 db.build_database()
 
 #felhasználó
-
-@app.route("/felhasznalok", methods=["POST"])
-def add_felhasznalo():
-    data = request.json
-    success = db.add_felhasznalo(data["user_id"], data["email"], data["jelszo"])
-    return jsonify({"success": success})
 
 @app.route("/felhasznalok/<user_id>", methods=["GET"])
 def get_felhasznalo(user_id):
@@ -24,17 +21,6 @@ def get_felhasznalo(user_id):
             "koltesi_limit": result[3]
         })
     return jsonify({"error": "User not found"}), 404
-
-@app.route("/felhasznalok/<user_id>", methods=["PUT"])
-def edit_felhasznalo(user_id):
-    data = request.json
-    success = db.edit_felhasznalo(user_id, data.get("koltesi_limit"))
-    return jsonify({"success": success})
-
-@app.route("/felhasznalok/<user_id>", methods=["DELETE"])
-def delete_felhasznalo(user_id):
-    success = db.delete_napi_koltes(0, user_id)
-    return jsonify({"success": success})
 
 #napi költések 
 
@@ -114,6 +100,51 @@ def edit_kategoria_nev(id):
 def delete_kategoria_nev(id):
     success = db.delete_kategoria_nev(0, int(id))
     return jsonify({"success": success})
+
+# chartok
+@app.route("/api/expenses/<user_id>/<int:year>", methods=["GET"])
+def get_expenses(user_id, year):
+    query = """
+        SELECT strftime('%m', nk.datum) AS month, SUM(k.osszeg) AS total
+        FROM koltesek k
+        JOIN koltesi_kategoriak kk ON kk.koltes_id = k.koltes_id
+        JOIN napi_koltesek nk ON nk.kategoria_csoport_id = kk.kategoria_csoport_id
+        WHERE nk.user_id = ? AND strftime('%Y', nk.datum) = ?
+        GROUP BY month
+        ORDER BY month;
+    """
+    result = db.fetch_all(query, (user_id, str(year)))
+    data = []
+    month_names = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+    month_dict = {row[0]: row[1] for row in result}
+    for i in range(1,13):
+        key = f"{i:02d}"
+        data.append({"month": month_names[i-1], "amount": month_dict.get(key,0)})
+    return jsonify(data)
+
+@app.route("/api/analysis/<user_id>", methods=["GET"])
+def get_analysis(user_id):
+    query = """
+        SELECT kn.nev AS kategoria_nev, kn.szin_kod AS szin, SUM(k.osszeg) AS osszes_osszeg
+        FROM koltesek k
+        JOIN koltesi_kategoriak kk ON kk.koltes_id = k.koltes_id
+        JOIN napi_koltesek nk ON nk.kategoria_csoport_id = kk.kategoria_csoport_id
+        JOIN kategoria_nevek kn ON kn.id = kk.kategoria_nev_id
+        WHERE nk.user_id = ?
+        GROUP BY kn.nev, kn.szin_kod
+        ORDER BY osszes_osszeg DESC;
+    """
+    result = db.fetch_all(query, (user_id,))
+    total = sum(row[2] for row in result) or 1  # nullára elkerülés
+    data = [
+        {
+            "category": row[0],
+            "color": f"#{row[1]}",  # az adatbázisban tárolt színkód
+            "percent": round(row[2]/total*100, 2)
+        }
+        for row in result
+    ]
+    return jsonify(data)
 
 if __name__ == "__main__":
     app.run(debug=True)
