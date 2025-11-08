@@ -4,6 +4,10 @@ import "./DeleteModal.css";
 export const DeleteModal = ({ isOpen, onClose, onDelete, day }) => {
   if (!isOpen) return null;
 
+  // backend: - nap törlése
+  //          - fontos: a "day" itt dátum string, a daycard-ból jön ha a kukára kattintasz
+  //          - szerintem id szerint ki lehetne nyerni, fáradt vagyok :(
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -16,6 +20,7 @@ export const DeleteModal = ({ isOpen, onClose, onDelete, day }) => {
         <div className="modal-buttons">
           <button className="close-button" onClick={onClose}>Mégse</button>
           <button className="delete-button" onClick={onDelete}>Törlés</button>
+          {/* törlés */}
         </div>
       </div>
     </div>

@@ -1,91 +1,119 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./CategoryManagerModal.css";
 
+// ez csak a törlést megerősítő modal, nem kell rajta módosítani, de a kommentet törölheted
+// ha jóváhagyod a tanácsom :D
 const ConfirmModal = ({ isOpen, onConfirm, onCancel, message }) => {
-    if (!isOpen) return null;
-    return (
-        <div className="modal-overlay" onClick={onCancel}>
-            <div className="modal-content" onClick={e => e.stopPropagation()}>
-                <p className="confirm-message">{message}</p>
-                <div className="modal-buttons">
-                    <button className="close-button" onClick={onCancel}>Mégse</button>
-                    <button className="delete-button" onClick={onConfirm}>Törlés</button>
-                </div>
-            </div>
+  if (!isOpen) return null;
+  return (
+    <div className="modal-overlay" onClick={onCancel}>
+      <div className="modal-content" onClick={e => e.stopPropagation()}>
+        <p className="confirm-message">{message}</p>
+        <div className="modal-buttons">
+          <button className="close-button" onClick={onCancel}>Mégse</button>
+          <button className="delete-button" onClick={onConfirm}>Törlés</button>
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export const CategoryManagerModal = ({ isOpen, onClose }) => {
-    const [categories, setCategories] = useState([
-        { name: "Étel", color: "#FF6B6B" },
-        { name: "Közlekedés", color: "#4ECDC4" },
-        { name: "Szórakozás", color: "#FFD93D" },
-    ]);
-    const [newCategory, setNewCategory] = useState({ name: "", color: "#cccccc" });
-    const [confirmIndex, setConfirmIndex] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [newCategory, setNewCategory] = useState({ name: "", color: "#cccccc" });
+  const [confirmIndex, setConfirmIndex] = useState(null);
 
-    const handleAddCategory = () => {
-        if (!newCategory.name.trim()) return;
-        setCategories([...categories, newCategory]);
-        setNewCategory({ name: "", color: "#cccccc" });
-    };
+  // kategóriák
 
-    const handleCategoryChange = (index, field, value) => {
-        const updated = [...categories];
-        updated[index][field] = value;
-        setCategories(updated);
-    };
+  const handleAddCategory = () => {
+    if (!newCategory.name.trim()) return;
 
-    const handleDelete = (index) => {
-        setConfirmIndex(index);
-    };
+    // új kategória mentése
 
-    const confirmDelete = () => {
-        const updated = categories.filter((_, i) => i !== confirmIndex);
-        setCategories(updated);
-        setConfirmIndex(null);
-    };
+    setNewCategory({ name: "", color: "#cccccc" });
+  };
 
-    const cancelDelete = () => setConfirmIndex(null);
+  const handleCategoryChange = (index, field, value) => {
+    const updated = [...categories];
+    updated[index][field] = value;
+    setCategories(updated);
 
-    if (!isOpen) return null;
+    // kategória frissítése
+  };
 
-    return (
-        <>
-            <div className="modal-overlay" onClick={onClose}>
-                <div className="modal-content" onClick={e => e.stopPropagation()}>
-                    <h2 className="modal-title">Kategóriák kezelése</h2>
+  const handleDelete = (index) => {
+    setConfirmIndex(index);
+  };
 
-                    <div className="category-list">
-                        {categories.map((cat, i) => (
-                            <div key={i} className="category-row">
-                                <input type="color" value={cat.color} onChange={e => handleCategoryChange(i, "color", e.target.value)}/>
-                                <input type="text" value={cat.name} onChange={e => handleCategoryChange(i, "name", e.target.value)}/>
-                                <button className="delete-btn" onClick={() => handleDelete(i)}>Törlés</button>
-                            </div>
-                        ))}
-                    </div>
+  const confirmDelete = () => {
+    const categoryToDelete = categories[confirmIndex];
 
-                    <div className="add-category-label">Új kategória hozzáadása</div>
-                    <div className="add-category">
-                        <input type="color" value={newCategory.color} onChange={e => setNewCategory({...newCategory,color:e.target.value})}/>
-                        <input type="text" placeholder="Új kategória neve" value={newCategory.name} onChange={e => setNewCategory({...newCategory,name:e.target.value})}/>
-                        <button className="add-btn" onClick={handleAddCategory}>Hozzáadás</button>
-                    </div>
+    // kategória törlése
 
-                    <div className="category-modal-buttons">
-                        <button className="category-close-btn" onClick={onClose}>Bezárás</button>
-                    </div>
-                </div>
-            </div>
+    setConfirmIndex(null);
+  };
 
-            <ConfirmModal
-                isOpen={confirmIndex !== null}
-                onConfirm={confirmDelete}
-                onCancel={cancelDelete}
-                message="Biztosan törölni szeretnéd a kategóriát?"
+  const cancelDelete = () => setConfirmIndex(null);
+
+  if (!isOpen) return null;
+
+  return (
+    <>
+      <div className="modal-overlay" onClick={onClose}>
+        <div className="modal-content" onClick={e => e.stopPropagation()}>
+          <h2 className="modal-title">Kategóriák kezelése</h2>
+
+          {/* categories.map */}
+          <div className="category-list">
+            {categories.map((cat, i) => (
+              <div key={cat.id || i} className="category-row">
+                <input
+                  type="color"
+                  value={cat.color}
+                  onChange={e => handleCategoryChange(i, "color", e.target.value)}
+                />
+                <input
+                  type="text"
+                  value={cat.name}
+                  onChange={e => handleCategoryChange(i, "name", e.target.value)}
+                />
+                <button className="delete-btn" onClick={() => handleDelete(i)}>
+                  Törlés
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <div className="add-category-label">Új kategória hozzáadása</div>
+          <div className="add-category">
+            <input
+              type="color"
+              value={newCategory.color}
+              onChange={e => setNewCategory({ ...newCategory, color: e.target.value })}
             />
-        </>
-    );
+            <input
+              type="text"
+              placeholder="Új kategória neve"
+              value={newCategory.name}
+              onChange={e => setNewCategory({ ...newCategory, name: e.target.value })}
+            />
+            <button className="add-btn" onClick={handleAddCategory}>
+              Hozzáadás
+            </button>
+          </div>
+
+          <div className="category-modal-buttons">
+            <button className="category-close-btn" onClick={onClose}>Bezárás</button>
+          </div>
+        </div>
+      </div>
+
+      <ConfirmModal
+        isOpen={confirmIndex !== null}
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+        message="Biztosan törölni szeretnéd a kategóriát?"
+      />
+    </>
+  );
 };

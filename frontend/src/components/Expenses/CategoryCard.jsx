@@ -4,18 +4,17 @@ import { Trash2 } from "lucide-react";
 import "./DayCard.css";
 
 export const CategoryCard = ({ category, isEditing }) => {
-  // Backendből jön majd a kategória adata
-  // const category = backendData;
+  // backend - kategória adatai (kódban figyelni kell: category. előfordulásokra)
 
-  const categoryTotal = category?.entries?.reduce(
+  // ez itt vvvv összeadja az entry-k összegét, át kell írni
+  const categoryTotal = category.entries.reduce(
     (sum, entry) => sum + Number(entry.amount), 
     0
   ) || 0;
 
-  const categoryColors = { Étel:"#FF6B6B", Közlekedés:"#4ECDC4", Szórakozás:"#FFD93D", Számlák:"#1E90FF", Bevásárlás:"#9B59B6", Egyéb:"#CCC" };
-  const availableCategories = Object.keys(categoryColors);
+  // backend 	- kategória színek lekérdezése -> ahol category.color van át kell írni
 
-  // backend update/delete/add entry
+  // 			- update/delete/add entry
 
   return (
     <div className="category-card">
@@ -26,6 +25,7 @@ export const CategoryCard = ({ category, isEditing }) => {
             <select value={category.name} className="category-select" disabled>
               <option value="">Válassz kategóriát</option>
               {availableCategories.map((cat, i) => <option key={i} value={cat}>{cat}</option>)}
+			  {/* availableCategories itt majd a sima category lesz */}
             </select>
           ) : (
             <span className="category-name">{category.name}</span>

@@ -1,22 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "./AddDayModal.css";
 
 export const AddDayModal = ({ isOpen, onClose, onSave }) => {
-  const todayString = new Date().toISOString().split("T")[0];
-  const [date, setDate] = useState(todayString);
+  const [date, setDate] = useState("");
 
-  useEffect(() => {
-    if (isOpen) setDate(todayString);
-  }, [isOpen]);
+  // az API-ból jöhetne a mai dátum (pl. szerveridő alapján),
+  // setDate értékét kell beállítani erre
+  // ez azt a célt szolgálná, hogy amikor megnyitod az addday-t akkor alapból a mai nap jön be
 
   const handleSave = () => {
     if (!date) return;
+
+    // POST új nap mentéséhez
     onSave({
-      date,
-      categories: [
-        { name: "Új kategória", color: "#4CAF50", entries: [{ description: "Új tétel", amount: 0 }] }
-      ]
+      date
     });
+
     onClose();
   };
 
@@ -28,7 +27,11 @@ export const AddDayModal = ({ isOpen, onClose, onSave }) => {
         <h2 className="modal-title">Új nap hozzáadása</h2>
         <div className="add-modal-input-container">
           <label>Dátum:</label>
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+          />
         </div>
         <div className="modal-buttons">
           <button className="close-button" onClick={onClose}>Mégse</button>
