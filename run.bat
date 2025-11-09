@@ -10,6 +10,17 @@ if "%bemenet%"=="1" (
 	cd ../backend
 )
 
+if not exist ".venv\Scripts\activate.bat" (
+    echo Virtual environment not found. Creating...
+    python -m venv .venv
+    if errorlevel 1 (
+        echo ERROR: Failed to create virtual environment!
+        pause
+        exit /b 1
+    )
+    echo Virtual environment created successfully
+)
+
 call .venv\Scripts\activate.bat
 if errorlevel 1 (
     echo ERROR: Failed to activate virtual environment!
