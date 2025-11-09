@@ -1,4 +1,4 @@
-from flask import Flask, send_from_directory, render_template, request, redirect, url_for, flash, session, jsonify
+from flask import Flask, send_from_directory, request, redirect, url_for, session, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash # 150-200 karakteres mezőt igényel legalább
 from flask_cors import CORS
 from app.database import Database
@@ -21,6 +21,11 @@ def create_app():
             f'<script>window.REACT_PAGE="{page_name}";</script>\n<script type="module"', 1
         )
         return injected_html
+
+    def is_logged():
+        if 'user_id' not in session:
+            return redirect(url_for('login', msg='Nincs bejelentkezve!'))
+        return True
 
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # backend mappa
     FRONTEND_DIST = os.path.abspath(os.path.join(BASE_DIR, '../../frontend/dist'))
@@ -122,20 +127,52 @@ def create_app():
 
     @app.route('/expenses')
     def expenses():
-        if 'user_id' not in session:
-            return redirect(url_for('login', msg='Nincs bejelentkezve!'))
+        if (x := is_logged()) != True: return x # login ellenőrzés
         return serve_react_page('expenses')
+
+    @app.route("/api/get_napi_koltesek")
+    def get_napi_koltesek():
+        if (x := is_logged()) != True: return x # login ellenőrzés
+        eredmeny = {}
+        napok = db.select_napi_koltesek(0, session['user_id'])
+        for i in napok:
+            datum = i[2]
+            eredmeny[datum] = {}
+            koltesi_kategoriak = db.select_koltesi_kategoriak(1, i[1])
+
+            for y in koltesi_kategoriak:
+                kategoria_nevek = db.select_kategoria_nevek(0, y[2])[0]
+                k_nev = kategoria_nevek[1]
+                k_szin = kategoria_nevek[2]
+                koltesek_lista = []
+                eredmeny[datum][k_nev] = {"szin_kod":k_szin, "koltesek": koltesek_lista}
+                koltesek = db.select_koltesek(1, y[0])
+
+                for z in koltesek:
+                    koltesek_lista.append({"leiras": z[2], "osszeg": z[3]})
+        return jsonify(eredmeny)
+
+    @app.route("/api/add_napi_koltes")
+    def add_napi_koltes():
+        if (x := is_logged()) != True: return x # login ellenőrzés
+        data = request.get_json()
+        uj_datum = data.get("datum")
+        if uj_datum is None: jsonify({"error": True, "info": "A dátum mező nem létezik!"})
+
+        if not db.add_napi_koltes(session['user_id'], uj_datum):
+            jsonify({"error": True, "info": "A kért nap nem hozzáadható!"})
+
+        return jsonify({"error": False,"info": "Sikeres hozzáadás"})
+
 
     @app.route('/analysis')
     def analysis():
-        if 'user_id' not in session:
-            return jsonify({'error': 'Nincs bejelentkezve!'}), 401
+        if (x := is_logged()) != True: return x # login ellenőrzés
         return serve_react_page('analysis')
 
     @app.route('/ai')
     def ai():
-        if 'user_id' not in session:
-            return jsonify({'error': 'Nincs bejelentkezve!'}), 401
+        if (x := is_logged()) != True: return x # login ellenőrzés
         return serve_react_page('ai')
 
     # statikus fájlok (JS, CSS)

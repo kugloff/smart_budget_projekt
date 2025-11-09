@@ -35,8 +35,10 @@ def init_tables() -> dict:
 
     kategoria_nevek = TableBluePrint("Kategoria_nevek")
     kategoria_nevek.Add_mezo("id", TipusConst.INTEGER, megkotes=MegkotesConst.PK)
-    kategoria_nevek.Add_mezo("nev", TipusConst.VARCHAR, adat_hossz=45)
-    kategoria_nevek.Add_mezo("szin_kod", TipusConst.VARCHAR, adat_hossz=6)
+    kategoria_nevek.Add_mezo("nev", TipusConst.VARCHAR, adat_hossz=45, megkotes=MegkotesConst.NN)
+    kategoria_nevek.Add_mezo("szin_kod", TipusConst.VARCHAR, adat_hossz=6, megkotes=MegkotesConst.NN)
+    kategoria_nevek.Add_mezo("tulajdonos", TipusConst.VARCHAR, adat_hossz=70, megkotes=MegkotesConst.NN)
+    kategoria_nevek.Table_megkotes(f"UNIQUE({kategoria_nevek.mezonevek[1]}, {kategoria_nevek.mezonevek[3]})")
     Tables["kategoria_nevek"] = kategoria_nevek
 
     koltesi_kategoriak = TableBluePrint("koltesi_kategoriak")
@@ -195,9 +197,9 @@ class Database:
         return self.execute(table_blueprint.ToDELETE_FROM(where_mezo), (where_vaule,), error_print=False)
 
     # kategoria nevek kezelése
-    def add_kategoria_nev(self, nev:str, szinkod:str) -> bool:
+    def add_kategoria_nev(self, nev:str, szinkod:str, tulajdonos:str) -> bool:
         table_blueprint: TableBluePrint = self.tables["kategoria_nevek"]
-        return self.execute(table_blueprint.ToINSERT_INTO(3), (None, nev, szinkod), error_print=False)
+        return self.execute(table_blueprint.ToINSERT_INTO(4), (None, nev, szinkod, tulajdonos), error_print=False)
     def edit_kategoria_nev(self, edit_mezo:int, edit_value, where_vaule:int) -> bool:
         table_blueprint: TableBluePrint = self.tables["kategoria_nevek"]
         return self.execute(table_blueprint.ToUPDATE_TABLE(edit_mezo, 0), (edit_value, where_vaule), error_print=False)
@@ -207,14 +209,20 @@ class Database:
 
     # különböző lekérések
     # tuple -> van adat és azt kapjuk vissza
-    # bool -> kizárólag van_adat=True esetében van bool más esetben tuple|None || True ha legalább egy rekordot ad a lekérdezés (minimum 1) || False ha a lekérdezés nem ad vissza semmit
-    # None -> ha a lekérdezés nem adott vissza egyetlen rekordot sem.
-    def egyszeru_select(self, tabla_id:str, where_mezo:int, where_adat, van_adat:bool=False) -> tuple|bool|None:
+    # bool -> kizárólag van_adat=True esetében van bool más esetben list<tuple>|None || True ha legalább egy rekordot ad a lekérdezés (minimum 1) || False ha a lekérdezés nem ad vissza semmit
+    # [] -> ha a lekérdezés nem adott vissza egyetlen rekordot sem.
+    def egyszeru_select(self, tabla_id:str, where_mezo:int, where_adat, van_adat:bool=False) -> list|bool: # list<tuple>
         table_blueprint: TableBluePrint = self.tables[tabla_id]
-        eredmeny = self.fetch_one(f"SELECT * FROM {table_blueprint.table_name} WHERE {table_blueprint.mezonevek[where_mezo]}=?",(where_adat,))
-        return eredmeny is not None if van_adat else eredmeny
+        eredmeny = self.fetch_all(f"SELECT * FROM {table_blueprint.table_name} WHERE {table_blueprint.mezonevek[where_mezo]}=?",(where_adat,))
+        return eredmeny != [] if van_adat else eredmeny
 
-    def select_felhasznalo(self, where_mezo:int, where_adat, van_adat:bool=False) -> tuple|bool|None:
+    def select_felhasznalo(self, where_mezo:int, where_adat, van_adat:bool=False) -> list|bool|None:
         return self.egyszeru_select("felhasznalok",where_mezo, where_adat, van_adat)
-    def select_napi_koltesek(self, where_mezo:int, where_adat, van_adat:bool=False) -> tuple|bool|None:
+    def select_napi_koltesek(self, where_mezo:int, where_adat, van_adat:bool=False) -> list|bool|None:
         return self.egyszeru_select("napi_koltesek",where_mezo, where_adat, van_adat)
+    def select_koltesi_kategoriak(self, where_mezo:int, where_adat, van_adat:bool=False) -> list|bool|None:
+        return self.egyszeru_select("koltesi_kategoriak",where_mezo, where_adat, van_adat)
+    def select_koltesek(self, where_mezo:int, where_adat, van_adat:bool=False) -> list|bool|None:
+        return self.egyszeru_select("koltesek",where_mezo, where_adat, van_adat)
+    def select_kategoria_nevek(self, where_mezo:int, where_adat, van_adat:bool=False) -> list|bool|None:
+        return self.egyszeru_select("kategoria_nevek",where_mezo, where_adat, van_adat)
