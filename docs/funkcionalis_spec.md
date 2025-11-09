@@ -64,7 +64,7 @@ A felhasználó számára egy **webes felület** biztosítja:
 ### Használati eset diagram
 **Használati esetek (Use Case)**
 
-[@TODO]
+![image](./pics/USE_CASE_diagram.png)
 
 ---
 
