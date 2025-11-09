@@ -4,11 +4,6 @@ import { LimitModal } from '../Modals/LimitModal/LimitModal';
 import { CategoryManagerModal } from '../Modals/CategoryManagerModal/CategoryManagerModal';
 
 export const Navbar = ({ onOpenAddDayModal }) => {
-  // 🟢 BACKEND:
-  // - limit lekérése és mentése (LimitModal)
-  // - kategória lista lekérése és mentése (CategoryManagerModal)
-  // Ezeket majd a useEffect-ben és onSave-ben kell kezelni.
-
   const [isLimitModalOpen, setIsLimitModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [limit, setLimit] = useState(-1); // alapérték (-1 → nincs limit)
@@ -16,15 +11,9 @@ export const Navbar = ({ onOpenAddDayModal }) => {
   const currentPage = window.REACT_PAGE || 'login';
   const isLoggingIn = currentPage === 'login';
 
-  // 🟢 BACKEND: amikor a komponens betölt (pl. useEffect-ben),
-  // le kell kérni a bejelentkezett felhasználó aktuális havi limitjét és kategóriáit:
-  //
-  // useEffect(() => {
-  //   axios.get('/api/limit').then(res => setLimit(res.data.limit));
-  //   axios.get('/api/categories').then(res => setCategories(res.data));
-  // }, []);
-  //
-  // A kategóriák állapotát viszont a CategoryManagerModal-on belül fogod kezelni.
+  // le kell kérni a bejelentkezett felhasználó aktuális havi limitjét
+  // kategóriákat
+  // a kategóriákat viszont a categoryManagerModal-ban kell majd változtatni
 
   return (
     <nav className="container">
@@ -38,7 +27,7 @@ export const Navbar = ({ onOpenAddDayModal }) => {
           </li>
           {currentPage === 'expenses' && (
             <li className="limit-button" onClick={() => setIsLimitModalOpen(true)}>
-              Költési limit beállítása {/* 🟢 backend: limit lekérése */}
+              Költési limit beállítása {/* limit lekérése */}
             </li>
           )}
         </ul>
@@ -63,7 +52,7 @@ export const Navbar = ({ onOpenAddDayModal }) => {
             <>
               <button onClick={onOpenAddDayModal}>Új nap hozzáadása</button>
               <button onClick={() => setIsCategoryModalOpen(true)}>Kategóriák kezelése</button>
-              {/* 🟢 backend: kategória-adatok lekérése */}
+              {/* kategória-adatok lekérése */}
             </>
           ) : (
             <span style={{ visibility: 'hidden' }}>Placeholder</span>
@@ -83,15 +72,12 @@ export const Navbar = ({ onOpenAddDayModal }) => {
         </span>
       </div>
 
-      {/* LimitModal – backend POST mentés */}
+      {/* LimitModal mentés */}
       <LimitModal
         isOpen={isLimitModalOpen}
         onClose={() => setIsLimitModalOpen(false)}
         onSave={() => {
-          // 🟢 BACKEND: mentés a szerverre
-          // axios.post('/api/limit', { limit })
-          //   .then(() => console.log('Limit mentve:', limit))
-          //   .catch(err => console.error('Hiba:', err));
+          // mentés
           setIsLimitModalOpen(false);
         }}
         limit={limit}

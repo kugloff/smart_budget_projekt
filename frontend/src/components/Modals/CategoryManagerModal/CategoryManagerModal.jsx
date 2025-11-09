@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./CategoryManagerModal.css";
 
-// ez csak a törlést megerősítő modal, nem kell rajta módosítani, de a kommentet törölheted
-// ha jóváhagyod a tanácsom :D
+// ez csak a törlést megerősítő modal
 const ConfirmModal = ({ isOpen, onConfirm, onCancel, message }) => {
   if (!isOpen) return null;
   return (
@@ -59,8 +58,8 @@ export const CategoryManagerModal = ({ isOpen, onClose }) => {
 
   return (
     <>
-      <div className="modal-overlay" onClick={onClose}>
-        <div className="modal-content" onClick={e => e.stopPropagation()}>
+      <div className="modal-overlay">
+        <div className="modal-content">
           <h2 className="modal-title">Kategóriák kezelése</h2>
 
           {/* categories.map */}
