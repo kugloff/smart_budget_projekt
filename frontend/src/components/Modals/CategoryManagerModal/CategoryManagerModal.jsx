@@ -66,16 +66,8 @@ export const CategoryManagerModal = ({ isOpen, onClose }) => {
           <div className="category-list">
             {categories.map((cat, i) => (
               <div key={cat.id || i} className="category-row">
-                <input
-                  type="color"
-                  value={cat.color}
-                  onChange={e => handleCategoryChange(i, "color", e.target.value)}
-                />
-                <input
-                  type="text"
-                  value={cat.name}
-                  onChange={e => handleCategoryChange(i, "name", e.target.value)}
-                />
+                <span key={i} className="small-dot" style={{ backgroundColor: cat.color }} />
+                <h1>{cat.name}</h1>
                 <button className="delete-btn" onClick={() => handleDelete(i)}>
                   Törlés
                 </button>
