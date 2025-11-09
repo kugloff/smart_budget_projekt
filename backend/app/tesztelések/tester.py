@@ -8,18 +8,6 @@ db_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "database.db"
 db:Database = Database(db_path)
 db.build_database()
 USER = "VVZDMQ"
-ered = {
-    "2025-11-10": {
-        "Utazás": {
-            "szinkod": "#34F2AA",
-            "koltesek": [{"leiras": "alma", "osszeg": 1000}, {"leiras": "alma2", "osszeg": 2000}]
-        },
-        "Tisza adó": {
-            "szinkod": "#21F7BB",
-            "koltesek": [{"leiras": "A Fideszes Tisza adóterhelés", "osszeg": 33}]
-        }
-    }
-}
 
 '''
 >> {} // nincs egyetlen napi költés sem.

@@ -138,14 +138,13 @@ def create_app():
         for i in napok:
             datum = i[2]
             eredmeny[datum] = {}
-            koltesi_kategoriak = db.select_koltesi_kategoriak(1, i[1])
-
+            koltesi_kategoriak = db.select_koltesi_kategoriak(0, i[1])
             for y in koltesi_kategoriak:
                 kategoria_nevek = db.select_kategoria_nevek(0, y[2])[0]
                 k_nev = kategoria_nevek[1]
                 k_szin = kategoria_nevek[2]
                 koltesek_lista = []
-                eredmeny[datum][k_nev] = {"szin_kod":k_szin, "koltesek": koltesek_lista}
+                eredmeny[datum][k_nev] = {"szin_kod": k_szin, "koltesek": koltesek_lista}
                 koltesek = db.select_koltesek(1, y[0])
 
                 for z in koltesek:
