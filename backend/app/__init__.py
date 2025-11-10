@@ -64,7 +64,7 @@ def create_app():
                     return jsonify({"success": False, "message": "Email és jelszó megadása kötelező!"}), 400
 
                 # --- Felhasználó keresése ---
-                felhasznalo = db.select_felhasznalo(1, email)
+                felhasznalo = db.select_felhasznalo(1, email)[0]
                 if not felhasznalo:
                     return jsonify({"success": False, "message": "Hibás email cím vagy jelszó!"}), 401
 
@@ -105,8 +105,8 @@ def create_app():
                     return jsonify({"success": False, "message": "Név, Email és jelszó megadása kötelező!"}), 400
 
                 # --- Felhasználó keresése ---
-                foglalt_nev = db.select_felhasznalo(0, name, van_adat=True)
-                foglalt_email = db.select_felhasznalo(1, email, van_adat=True)
+                foglalt_nev = db.select_felhasznalo(0, name, van_adat=True)[0]
+                foglalt_email = db.select_felhasznalo(1, email, van_adat=True)[0]
                 if foglalt_nev:
                     return jsonify({"success": False, "message": "A megadott név már foglalt!"}), 401
                 if foglalt_email:
