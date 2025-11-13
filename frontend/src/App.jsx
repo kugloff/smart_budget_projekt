@@ -37,6 +37,9 @@ const App = () => {
       <AddDayModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
+        onSave={(newDay) => {
+        console.log("🗓️ Új nap mentése:", newDay);
+      }}
       />
     </>
   );

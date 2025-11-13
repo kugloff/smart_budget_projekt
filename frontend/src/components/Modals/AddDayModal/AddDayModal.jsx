@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./AddDayModal.css";
 
 export const AddDayModal = ({ isOpen, onClose, onSave }) => {
@@ -7,6 +7,14 @@ export const AddDayModal = ({ isOpen, onClose, onSave }) => {
   // az API-ból jöhetne a mai dátum (pl. szerveridő alapján),
   // setDate értékét kell beállítani erre
   // ez azt a célt szolgálná, hogy amikor megnyitod az addday-t akkor alapból a mai nap jön be
+
+  useEffect(() => {
+    if (isOpen) {
+      const today = new Date();
+      const formatted = today.toISOString().split("T")[0]; // yyyy-mm-dd
+      setDate(formatted);
+    }
+  }, [isOpen]);
 
   const handleSave = () => {
     if (!date) return;
