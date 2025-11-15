@@ -27,6 +27,17 @@ def create_app():
             return redirect(url_for('login', msg='Nincs bejelentkezve!'))
         return True
 
+    def get_kategoria_koltesek(kategoria_id:int) -> list:
+        koltesek = db.select_koltesek(1, kategoria_id)
+        return [{"leiras": z[2], "osszeg": z[3]} for z in koltesek]
+
+    def get_nap_kategoriak(nap_id: int) -> dict:
+        end = {}
+        for y in db.select_koltesi_kategoriak(0, nap_id):
+            kategoria_nevek = db.select_kategoria_nevek(0, y[2])[0]
+            end[kategoria_nevek[1]] = {"szin_kod": kategoria_nevek[2], "koltesek": get_kategoria_koltesek(y[0])}
+        return end
+
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # backend mappa
     FRONTEND_DIST = os.path.abspath(os.path.join(BASE_DIR, '../../frontend/dist'))
 
@@ -137,18 +148,7 @@ def create_app():
         napok = db.select_napi_koltesek(0, session['user_id'])
         for i in napok:
             datum = i[2]
-            eredmeny[datum] = {}
-            koltesi_kategoriak = db.select_koltesi_kategoriak(0, i[1])
-            for y in koltesi_kategoriak:
-                kategoria_nevek = db.select_kategoria_nevek(0, y[2])[0]
-                k_nev = kategoria_nevek[1]
-                k_szin = kategoria_nevek[2]
-                koltesek_lista = []
-                eredmeny[datum][k_nev] = {"szin_kod": k_szin, "koltesek": koltesek_lista}
-                koltesek = db.select_koltesek(1, y[0])
-
-                for z in koltesek:
-                    koltesek_lista.append({"leiras": z[2], "osszeg": z[3]})
+            eredmeny[datum] = get_nap_kategoriak(i[1])
         return jsonify(eredmeny)
 
     @app.route("/api/add_napi_koltes")
@@ -156,13 +156,16 @@ def create_app():
         if (x := is_logged()) != True: return x # login ellenőrzés
         data = request.get_json()
         uj_datum = data.get("datum")
-        if uj_datum is None: jsonify({"error": True, "info": "A dátum mező nem létezik!"})
+        if uj_datum is None: return jsonify({"error": True, "info": "A dátum mező nem létezik!"})
 
         if not db.add_napi_koltes(session['user_id'], uj_datum):
-            jsonify({"error": True, "info": "A kért nap nem hozzáadható!"})
+            return jsonify({"error": True, "info": "A kért nap nem hozzáadható!"})
+        return jsonify({"error": False,"info": "Sikeres hozzáadás!"})
 
-        return jsonify({"error": False,"info": "Sikeres hozzáadás"})
-
+    @app.route("/api/get_koltes_kategoria/<str:date>/<str:kategoria_nev>")
+    def get_koltes_kategoria(date:str, kategoria_nev:str):
+        kategoria_nev_id = db.select_kategoria_nevek((1, 3), (kategoria_nev, session['user_id']))[0][0]
+        koltesi_kategoria = db.select_koltesi_kategoriak((), ()) # ezen a ponton van szükség hogy join-t is tudjon kezelni az adatbázis!
 
     @app.route('/analysis')
     def analysis():
