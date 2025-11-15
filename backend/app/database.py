@@ -14,6 +14,7 @@ class MegkotesConst(Enum):
     NN = "NOT NULL"
     NN_UK = "NOT NULL UNIQUE"
 
+
 def init_tables() -> dict:
     Tables = {}
 
@@ -65,6 +66,9 @@ class TableBluePrint:
         self.mezonevek = []
         self.create_sorok = []
 
+    def generate_where_list(self, where_mezo:tuple[int, ...]) -> str:
+        return ', '.join([self.mezonevek[i] + '=?' for i in where_mezo])
+
     def Add_mezo(self, mezo_nev:str, tipus:TipusConst, adat_hossz:int=0, megkotes:MegkotesConst=MegkotesConst.URES):
         self.mezonevek.append(mezo_nev)
         self.create_sorok.append({"sql":f"\t{mezo_nev} {tipus.value.replace('?', str(adat_hossz))}{f' {megkotes.value}' if megkotes.value != '' else ''}", "hossz":adat_hossz})
@@ -88,16 +92,20 @@ class TableBluePrint:
     def ToINSERT_INTO(self, values_db:int) -> str:
         return f"INSERT INTO {self.table_name} ({','.join(self.mezonevek)}) VALUES ({', '.join(['?']*values_db)})"
 
-    def ToUPDATE_TABLE(self, edit_mezo:int, where_mezo:int) -> str:
-        return f"UPDATE {self.table_name} SET {self.mezonevek[edit_mezo]} = ? WHERE {self.mezonevek[where_mezo]} = ?"
+    def ToUPDATE_TABLE(self, edit_mezo:tuple[int, ...], where_mezo:tuple[int, ...]) -> str:
+        return f"UPDATE {self.table_name} SET {self.generate_where_list(edit_mezo)} WHERE {self.generate_where_list(where_mezo)}"
 
-    def ToDELETE_FROM(self, where_mezo:int) -> str:
-        return f"DELETE FROM {self.table_name} WHERE {self.mezonevek[where_mezo]} = ?"
+    def ToDELETE_FROM(self, where_mezo:tuple[int, ...]) -> str:
+        return f"DELETE FROM {self.table_name} WHERE {self.generate_where_list(where_mezo)}"
 
 class Database:
     def __init__(self, db_path):
         self.db_path = db_path
         self.tables = init_tables()
+
+    @staticmethod
+    def generate_where(table_blueprint, where_mezo:tuple[int, ...]) -> str:
+        return ', '.join([table_blueprint.mezonevek[i] + '=?' for i in where_mezo])
 
     def connect(self):
         conn = sqlite3.connect(self.db_path)
@@ -162,16 +170,16 @@ class Database:
         return self.execute(table_blueprint.ToINSERT_INTO(4), (user_id, email, jelszo_hash, None), error_print=False)
     def edit_felhasznalo(self, user_id:str, koltesi_limit:int|None) -> bool:
         table_blueprint: TableBluePrint = self.tables["felhasznalok"]
-        return self.execute(table_blueprint.ToUPDATE_TABLE(3, 0), (koltesi_limit, user_id), error_print=False)
+        return self.execute(table_blueprint.ToUPDATE_TABLE((3, ), (0, )), (koltesi_limit, user_id), error_print=False)
 
     # napi költések kezelése
     def add_napi_koltes(self, user_id:str, datum:str) -> bool|str:
         table_blueprint: TableBluePrint = self.tables["napi_koltesek"]
         # ha sikeresen a hozzáadás True, ha UNIQUE(user_id, datum) sért akkor "IntegrityError" ha egyéb hiba akkor False
         return self.execute(table_blueprint.ToINSERT_INTO(3), (user_id, None, datum), return_integritas_error=True)
-    def delete_napi_koltes(self, where_mezo:int, where_vaule) -> bool:
+    def delete_napi_koltes(self, where_mezo:tuple[int, ...], where_adat) -> bool:
         table_blueprint: TableBluePrint = self.tables["napi_koltesek"]
-        return self.execute(table_blueprint.ToDELETE_FROM(where_mezo), (where_vaule, ), error_print=False)
+        return self.execute(table_blueprint.ToDELETE_FROM(where_mezo), where_adat, error_print=False)
 
     # költési kategóriák kezelése
     def add_koltesi_kategoria(self, kategoria_csoport_id:int, kategoria_nev_id:int) -> bool|str|None:
@@ -179,50 +187,55 @@ class Database:
         return self.execute(table_blueprint.ToINSERT_INTO(3), (kategoria_csoport_id, None, kategoria_nev_id), return_integritas_error=True)
     def edit_koltesi_kategoria(self, koltes_id:int, kategoria_nev_id:int) -> bool|str|None:
         table_blueprint: TableBluePrint = self.tables["koltesi_kategoriak"]
-        return self.execute(table_blueprint.ToUPDATE_TABLE(2, 0), (kategoria_nev_id, koltes_id), return_integritas_error=True)
-    def delete_koltesi_kategoria(self, where_mezo:int, where_vaule):
+        return self.execute(table_blueprint.ToUPDATE_TABLE((2, ), (0, )), (kategoria_nev_id, koltes_id), return_integritas_error=True)
+    def delete_koltesi_kategoria(self, where_mezo:tuple[int, ...], where_adat:tuple):
         table_blueprint: TableBluePrint = self.tables["koltesi_kategoriak"]
-        return self.execute(table_blueprint.ToDELETE_FROM(where_mezo), (where_vaule, ), error_print=False)
+        return self.execute(table_blueprint.ToDELETE_FROM(where_mezo), where_adat, error_print=False)
 
     # költések kezelése
     def add_koltesek(self, koltes_id:int, leiras:str|None, osszeg:int) -> bool|str|None:
         table_blueprint: TableBluePrint = self.tables["koltesek"]
         leiras = None if leiras == "" or leiras is None else leiras.strip()
         return self.execute(table_blueprint.ToINSERT_INTO(4), (None, koltes_id, leiras, osszeg), return_integritas_error=True)
-    def edit_koltesek(self, edit_mezo:int, edit_vaule:int, where_vaule:int) -> bool|None:
+    def edit_koltesek(self, edit_mezo:tuple[int, ...], edit_vaule:int, where_vaule:int) -> bool|None:
         table_blueprint: TableBluePrint = self.tables["koltesek"]
-        return self.execute(table_blueprint.ToUPDATE_TABLE(edit_mezo, 0), (edit_vaule, where_vaule), error_print=False)
-    def delete_koltesek(self, where_mezo:int, where_vaule:int):
+        return self.execute(table_blueprint.ToUPDATE_TABLE(edit_mezo, (0, )), (edit_vaule, where_vaule), error_print=False)
+    def delete_koltesek(self, where_mezo:tuple[int, ...], where_adat:tuple):
         table_blueprint: TableBluePrint = self.tables["koltesek"]
-        return self.execute(table_blueprint.ToDELETE_FROM(where_mezo), (where_vaule,), error_print=False)
+        return self.execute(table_blueprint.ToDELETE_FROM(where_mezo), where_adat, error_print=False)
 
     # kategoria nevek kezelése
     def add_kategoria_nev(self, nev:str, szinkod:str, tulajdonos:str) -> bool:
         table_blueprint: TableBluePrint = self.tables["kategoria_nevek"]
         return self.execute(table_blueprint.ToINSERT_INTO(4), (None, nev, szinkod, tulajdonos), error_print=False)
-    def edit_kategoria_nev(self, edit_mezo:int, edit_value, where_vaule:int) -> bool:
+    def edit_kategoria_nev(self, edit_mezo:tuple[int, ...], edit_value:tuple, where_mezo:tuple[int, ...], where_vaule:tuple) -> bool:
         table_blueprint: TableBluePrint = self.tables["kategoria_nevek"]
-        return self.execute(table_blueprint.ToUPDATE_TABLE(edit_mezo, 0), (edit_value, where_vaule), error_print=False)
-    def delete_kategoria_nev(self, where_mezo:int, where_vaule:int):
+        return self.execute(table_blueprint.ToUPDATE_TABLE(edit_mezo, where_mezo), (edit_value+where_vaule), error_print=False)
+    def delete_kategoria_nev(self, where_mezo:tuple[int, ...], where_adat:tuple):
         table_blueprint: TableBluePrint = self.tables["kategoria_nevek"]
-        return self.execute(table_blueprint.ToDELETE_FROM(where_mezo), (where_vaule,), error_print=False)
+        return self.execute(table_blueprint.ToDELETE_FROM(where_mezo), where_adat, error_print=False)
 
     # különböző lekérések
-    # tuple -> van adat és azt kapjuk vissza
-    # bool -> kizárólag van_adat=True esetében van bool más esetben list<tuple>|None || True ha legalább egy rekordot ad a lekérdezés (minimum 1) || False ha a lekérdezés nem ad vissza semmit
+    # list<tuple> -> van adat és azt kapjuk vissza
+    # bool -> kizárólag van_adat=True esetében van bool más esetben list<tuple> || True ha legalább egy rekordot ad a lekérdezés (minimum 1) || False ha a lekérdezés nem ad vissza semmit
     # [] -> ha a lekérdezés nem adott vissza egyetlen rekordot sem.
-    def egyszeru_select(self, tabla_id:str, where_mezo:int, where_adat, van_adat:bool=False) -> list|bool: # list<tuple>
+    def egyszeru_select(self, tabla_id:str, where_mezo:tuple[int, ...], where_adat:tuple, van_adat:bool=False) -> list|bool: # list<tuple>
         table_blueprint: TableBluePrint = self.tables[tabla_id]
-        eredmeny = self.fetch_all(f"SELECT * FROM {table_blueprint.table_name} WHERE {table_blueprint.mezonevek[where_mezo]}=?",(where_adat,))
+        eredmeny = self.fetch_all(f"SELECT * FROM {table_blueprint.table_name} WHERE {self.generate_where(table_blueprint, where_mezo)}", where_adat)
         return eredmeny != [] if van_adat else eredmeny
 
-    def select_felhasznalo(self, where_mezo:int, where_adat, van_adat:bool=False) -> list|bool|None:
+    def select_felhasznalo(self, where_mezo:tuple[int, ...]|int, where_adat:tuple|object, van_adat:bool=False) -> list|bool:
+        if isinstance(where_mezo, int): where_mezo, where_adat = (where_mezo,), (where_adat,)
         return self.egyszeru_select("felhasznalok",where_mezo, where_adat, van_adat)
-    def select_napi_koltesek(self, where_mezo:int, where_adat, van_adat:bool=False) -> list|bool|None:
+    def select_napi_koltesek(self, where_mezo:tuple[int, ...]|int, where_adat:tuple|object, van_adat:bool=False) -> list|bool:
+        if isinstance(where_mezo, int): where_mezo, where_adat = (where_mezo,), (where_adat,)
         return self.egyszeru_select("napi_koltesek",where_mezo, where_adat, van_adat)
-    def select_koltesi_kategoriak(self, where_mezo:int, where_adat, van_adat:bool=False) -> list|bool|None:
+    def select_koltesi_kategoriak(self, where_mezo:tuple[int, ...]|int, where_adat:tuple|object, van_adat:bool=False) -> list|bool:
+        if isinstance(where_mezo, int): where_mezo, where_adat = (where_mezo,), (where_adat,)
         return self.egyszeru_select("koltesi_kategoriak",where_mezo, where_adat, van_adat)
-    def select_koltesek(self, where_mezo:int, where_adat, van_adat:bool=False) -> list|bool|None:
+    def select_koltesek(self, where_mezo:tuple[int, ...]|int, where_adat:tuple|object, van_adat:bool=False) -> list|bool:
+        if isinstance(where_mezo, int): where_mezo, where_adat = (where_mezo,), (where_adat,)
         return self.egyszeru_select("koltesek",where_mezo, where_adat, van_adat)
-    def select_kategoria_nevek(self, where_mezo:int, where_adat, van_adat:bool=False) -> list|bool|None:
+    def select_kategoria_nevek(self, where_mezo:tuple[int, ...]|int, where_adat:tuple|object, van_adat:bool=False) -> list|bool:
+        if isinstance(where_mezo, int): where_mezo, where_adat = (where_mezo,), (where_adat,)
         return self.egyszeru_select("kategoria_nevek",where_mezo, where_adat, van_adat)
