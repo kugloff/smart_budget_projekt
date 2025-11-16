@@ -1,4 +1,4 @@
-from app.database import Database
+from app.database import Database, JoinTypes
 import os
 import pprint
 
@@ -121,6 +121,7 @@ print("-"*50)
 #b = get_napi_koltesek2()
 #print(b == a)
 
-er = db.egyszeru_select("kategoria_nevek", (0, 1, 2), (22, 33, 55))
+er = db.egyszeru_select("felhasznalok", (0, 1, 2), (22, 33, 55), "AND")
+er2 = db.univerzalis_join("felhasznalok", "napi_koltesek", JoinTypes.LEFT, 0, "VVZDMQ") # ez nem jó mert PK hoz kötünk PK-t
+print(er2)
 print((3, 6)+(8, 8))
-print(er)
