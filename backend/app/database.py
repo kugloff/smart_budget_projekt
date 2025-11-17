@@ -1,7 +1,6 @@
 from __future__ import annotations
 import sqlite3
 from enum import Enum
-import os
 
 class TipusConst(Enum):
     INTEGER = "INTEGER"
@@ -13,6 +12,16 @@ class MegkotesConst(Enum):
     PK = "PRIMARY KEY"
     NN = "NOT NULL"
     NN_UK = "NOT NULL UNIQUE"
+
+class JoinTypes(Enum):
+    INNER = "INNER JOIN"
+    LEFT = "LEFT JOIN"
+    CROSS = "CROSS JOIN" # Descartes-szorzat
+    NATURAL = "NATURAL JOIN" # automatikus oszlopnévegyezés
+
+class LogikaiOperatorok(Enum):
+    AND = "AND"
+    OR = "OR"
 
 
 def init_tables() -> dict:
@@ -64,17 +73,21 @@ class TableBluePrint:
     def __init__(self, table_name:str):
         self.table_name = table_name
         self.mezonevek = []
+        self.PK = None
         self.create_sorok = []
 
-    def generate_where_list(self, where_mezo:tuple[int, ...]) -> str:
-        return ', '.join([self.mezonevek[i] + '=?' for i in where_mezo])
+    def generate_where(self, where_mezo:tuple[int, ...], operator:LogikaiOperatorok=LogikaiOperatorok.AND, alias:str="") -> str:
+
+        return f' {operator} '.join([f"{alias}" + self.mezonevek[i] + '=?' for i in where_mezo])
 
     def Add_mezo(self, mezo_nev:str, tipus:TipusConst, adat_hossz:int=0, megkotes:MegkotesConst=MegkotesConst.URES):
         self.mezonevek.append(mezo_nev)
+        if megkotes == MegkotesConst.PK:
+            self.PK = mezo_nev
         self.create_sorok.append({"sql":f"\t{mezo_nev} {tipus.value.replace('?', str(adat_hossz))}{f' {megkotes.value}' if megkotes.value != '' else ''}", "hossz":adat_hossz})
 
-    def Add_Table_PK(self, *indexek:int):
-        self.Table_megkotes(f"PRIMARY KEY({', '.join([self.mezonevek[i] for i in indexek])})")
+    #def Add_Table_PK(self, *indexek:int):
+    #    self.Table_megkotes(f"PRIMARY KEY({', '.join([self.mezonevek[i] for i in indexek])})")
 
     def Add_Table_FK(self, kapcsolomezo_sajat:int, referencia_table:TableBluePrint, referencia_kapcsolomezo:int, onDelete:bool=False):
         self.Table_megkotes(f"FOREIGN KEY ({self.mezonevek[kapcsolomezo_sajat]}) REFERENCES {referencia_table.table_name} ({referencia_table.mezonevek[referencia_kapcsolomezo]}){' ON DELETE CASCADE' if onDelete else ''}")
@@ -85,7 +98,6 @@ class TableBluePrint:
     def ToSQL(self) -> str:
         return f"CREATE TABLE IF NOT EXISTS {self.table_name} (\n" + ",\n".join([i['sql'] for i in self.create_sorok]) + "\n)"
 
-
     def ToDROP_TABLE(self) -> str:
         return f"DROP TABLE IF EXISTS {self.table_name}"
 
@@ -93,10 +105,19 @@ class TableBluePrint:
         return f"INSERT INTO {self.table_name} ({','.join(self.mezonevek)}) VALUES ({', '.join(['?']*values_db)})"
 
     def ToUPDATE_TABLE(self, edit_mezo:tuple[int, ...], where_mezo:tuple[int, ...]) -> str:
-        return f"UPDATE {self.table_name} SET {self.generate_where_list(edit_mezo)} WHERE {self.generate_where_list(where_mezo)}"
+        return f"UPDATE {self.table_name} SET {self.generate_where(edit_mezo)} WHERE {self.generate_where(where_mezo)}"
 
     def ToDELETE_FROM(self, where_mezo:tuple[int, ...]) -> str:
-        return f"DELETE FROM {self.table_name} WHERE {self.generate_where_list(where_mezo)}"
+        return f"DELETE FROM {self.table_name} WHERE {self.generate_where(where_mezo)}"
+
+    def To_Join(self, kapcsolt_tabla:TableBluePrint, join_type:JoinTypes, where_mezo:tuple[int, ...]|int, operator:LogikaiOperatorok=LogikaiOperatorok.AND) -> str:
+        self_alias = self.table_name[0:2]
+        kapcsolt_alias = kapcsolt_tabla.table_name[0:2]
+
+        # módosítani kell mert nem lehet Pk hoz PK-t kötni, annak nincs értelme. kezelni kell hogy egy adott táblánkak mik az idegen kulcsai, és class szinten kezelni ezt
+        # vagyis ha azt mondom hogy felhasználók class hoz kötöm a napi költések class-t akkor az utóbbi tudja melyik FK-t kell adnia ami illik az első táblához.
+
+        return f"SELECT * FROM {self.table_name} {self_alias} {join_type.value} {kapcsolt_tabla.table_name} {kapcsolt_alias} ON {self_alias}.{self.PK} = {kapcsolt_alias}.{kapcsolt_tabla.PK} WHERE {self.generate_where(where_mezo, operator, self_alias+".")}"
 
 class Database:
     def __init__(self, db_path):
@@ -104,8 +125,8 @@ class Database:
         self.tables = init_tables()
 
     @staticmethod
-    def generate_where(table_blueprint, where_mezo:tuple[int, ...]) -> str:
-        return ', '.join([table_blueprint.mezonevek[i] + '=?' for i in where_mezo])
+    def generate_where(table_blueprint, where_mezo:tuple[int, ...], operator:LogikaiOperatorok=LogikaiOperatorok.AND) -> str:
+        return f' {operator} '.join([table_blueprint.mezonevek[i] + '=?' for i in where_mezo])
 
     def connect(self):
         conn = sqlite3.connect(self.db_path)
@@ -120,10 +141,10 @@ class Database:
               conn.commit()
               return True
         except sqlite3.IntegrityError as e:
-            if error_print and not return_integritas_error: print(f"A beszúranó adat megsérti a UNIQUE megkötés a táblában: {e}, query: {query}, params: {params}")
+            if error_print and not return_integritas_error: print(f"A beszúranó adat megsérti a UNIQUE megkötés a táblában: {e}, query: {query} params: {params}")
             return str(e) if return_integritas_error else False
         except sqlite3.Error as e:
-            if error_print and not return_integritas_error: print(f"Hiba az adatbázis művelet során: {e}, query: {query}, params: {params}")
+            if error_print and not return_integritas_error: print(f"Hiba az adatbázis művelet során: {e}, query: {query} params: {params}")
             return str(e)
 
     def fetch_all(self, query:str, params:tuple=(), error_print=True) -> list: # minta kimenet [(adat1, adat2, ...), (adat1, adat2, ...), (...), ...]
@@ -133,7 +154,7 @@ class Database:
               cursor.execute(query, params)
               return cursor.fetchall()
         except sqlite3.Error as e:
-            if error_print: print(f"Hiba a lekérdezés során: {e}, query: {query}, params: {params}")
+            if error_print: print(f"Hiba a lekérdezés során: {e}, query: {query} params: {params}")
             return []
 
     def fetch_one(self, query:str, params:tuple=(), error_print=True) -> tuple|None: # minta kienet: (adat1, adat2, adat3, ...)
@@ -143,7 +164,7 @@ class Database:
               cursor.execute(query, params)
               return cursor.fetchone()
         except sqlite3.Error as e:
-            if error_print: print(f"Hiba a lekérdezés során: {e}, query: {query}, params: {params}")
+            if error_print: print(f"Hiba a lekérdezés során: {e}, query: {query} params: {params}")
             return None
 
     def build_database(self):
@@ -219,23 +240,28 @@ class Database:
     # list<tuple> -> van adat és azt kapjuk vissza
     # bool -> kizárólag van_adat=True esetében van bool más esetben list<tuple> || True ha legalább egy rekordot ad a lekérdezés (minimum 1) || False ha a lekérdezés nem ad vissza semmit
     # [] -> ha a lekérdezés nem adott vissza egyetlen rekordot sem.
-    def egyszeru_select(self, tabla_id:str, where_mezo:tuple[int, ...], where_adat:tuple, van_adat:bool=False) -> list|bool: # list<tuple>
+    def egyszeru_select(self, tabla_id:str, where_mezo:tuple[int, ...], where_adat:tuple, operator:LogikaiOperatorok,van_adat:bool=False) -> list|bool: # list<tuple>
         table_blueprint: TableBluePrint = self.tables[tabla_id]
-        eredmeny = self.fetch_all(f"SELECT * FROM {table_blueprint.table_name} WHERE {self.generate_where(table_blueprint, where_mezo)}", where_adat)
+        eredmeny = self.fetch_all(f"SELECT * FROM {table_blueprint.table_name} WHERE {self.generate_where(table_blueprint, where_mezo, operator)}", where_adat)
         return eredmeny != [] if van_adat else eredmeny
 
-    def select_felhasznalo(self, where_mezo:tuple[int, ...]|int, where_adat:tuple|object, van_adat:bool=False) -> list|bool:
+    def select_felhasznalo(self, where_mezo:tuple[int, ...]|int, where_adat:tuple|object, van_adat:bool=False, operator:LogikaiOperatorok=LogikaiOperatorok.AND) -> list|bool:
         if isinstance(where_mezo, int): where_mezo, where_adat = (where_mezo,), (where_adat,)
-        return self.egyszeru_select("felhasznalok",where_mezo, where_adat, van_adat)
-    def select_napi_koltesek(self, where_mezo:tuple[int, ...]|int, where_adat:tuple|object, van_adat:bool=False) -> list|bool:
+        return self.egyszeru_select("felhasznalok",where_mezo, where_adat, operator, van_adat)
+    def select_napi_koltesek(self, where_mezo:tuple[int, ...]|int, where_adat:tuple|object, van_adat:bool=False, operator:LogikaiOperatorok=LogikaiOperatorok.AND) -> list|bool:
         if isinstance(where_mezo, int): where_mezo, where_adat = (where_mezo,), (where_adat,)
-        return self.egyszeru_select("napi_koltesek",where_mezo, where_adat, van_adat)
-    def select_koltesi_kategoriak(self, where_mezo:tuple[int, ...]|int, where_adat:tuple|object, van_adat:bool=False) -> list|bool:
+        return self.egyszeru_select("napi_koltesek",where_mezo, where_adat, operator, van_adat)
+    def select_koltesi_kategoriak(self, where_mezo:tuple[int, ...]|int, where_adat:tuple|object, van_adat:bool=False, operator:LogikaiOperatorok=LogikaiOperatorok.AND) -> list|bool:
         if isinstance(where_mezo, int): where_mezo, where_adat = (where_mezo,), (where_adat,)
-        return self.egyszeru_select("koltesi_kategoriak",where_mezo, where_adat, van_adat)
-    def select_koltesek(self, where_mezo:tuple[int, ...]|int, where_adat:tuple|object, van_adat:bool=False) -> list|bool:
+        return self.egyszeru_select("koltesi_kategoriak",where_mezo, where_adat, operator, van_adat)
+    def select_koltesek(self, where_mezo:tuple[int, ...]|int, where_adat:tuple|object, van_adat:bool=False, operator:LogikaiOperatorok=LogikaiOperatorok.AND) -> list|bool:
         if isinstance(where_mezo, int): where_mezo, where_adat = (where_mezo,), (where_adat,)
-        return self.egyszeru_select("koltesek",where_mezo, where_adat, van_adat)
-    def select_kategoria_nevek(self, where_mezo:tuple[int, ...]|int, where_adat:tuple|object, van_adat:bool=False) -> list|bool:
+        return self.egyszeru_select("koltesek",where_mezo, where_adat, operator, van_adat)
+    def select_kategoria_nevek(self, where_mezo:tuple[int, ...]|int, where_adat:tuple|object, van_adat:bool=False, operator:LogikaiOperatorok=LogikaiOperatorok.AND) -> list|bool:
         if isinstance(where_mezo, int): where_mezo, where_adat = (where_mezo,), (where_adat,)
-        return self.egyszeru_select("kategoria_nevek",where_mezo, where_adat, van_adat)
+        return self.egyszeru_select("kategoria_nevek",where_mezo, where_adat, operator, van_adat)
+
+    def univerzalis_join(self, tabla_index:str, kapcsolt_tabla_index:str, join_type:JoinTypes, where_mezo:tuple[int, ...]|int, where_adat:tuple|object, operator:LogikaiOperatorok=LogikaiOperatorok.AND):
+        if isinstance(where_mezo, int): where_mezo, where_adat = (where_mezo,), (where_adat,)
+        table_blueprint: TableBluePrint = self.tables[tabla_index]
+        return self.fetch_all(table_blueprint.To_Join(self.tables[kapcsolt_tabla_index], join_type, where_mezo, operator), where_adat)
