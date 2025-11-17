@@ -57,11 +57,6 @@ USER = "VVZDMQ"
                 }
 }
 
-
-{'2025-11-10': 
-{'2025-11-10': 
-{'Utazás': {'szin_kod': 'FFAA33', 'koltesek': [{'leiras': 'Családi adókedvezmény', 'osszeg': 99000}, {'leiras': 'Babaváróhitel törlesztés', 'osszeg': 10000}]}, 'AI propaganda': {'szin_kod': 'BABAFF', 'koltesek': [{'leiras': 'Családi adókedvezmény', 'osszeg': 99000}, {'leiras': 'Babaváróhitel törlesztés', 'osszeg': 10000}]}}}, '2025-11-9': {'2025-11-9': {'Tisza adó': {'szin_kod': 'AAFF11', 'koltesek': [{'leiras': 'Kitalált Tisza adó', 'osszeg': 3500}, {'leiras': 'Kitalált Tisza adó2', 'osszeg': 33000}]}, 'Fidesz adó': {'szin_kod': '5467FF', 'koltesek': [{'leiras': 'Kitalált Tisza adó', 'osszeg': 3500}, {'leiras': 'Kitalált Tisza adó2', 'osszeg': 33000}]}}}}
-
 '''
 
 
@@ -122,6 +117,10 @@ print("-"*50)
 #print(b == a)
 
 er = db.egyszeru_select("felhasznalok", (0, 1, 2), (22, 33, 55), "AND")
-er2 = db.univerzalis_join("felhasznalok", "napi_koltesek", JoinTypes.LEFT, 0, "VVZDMQ") # ez nem jó mert PK hoz kötünk PK-t
+er2 = db.univerzalis_join("felhasznalok", "napi_koltesek", JoinTypes.LEFT, (0, 4, 6), ("VVZDMQ", "IDK ki", "2025")) # ez nem jó mert PK hoz kötünk PK-t
 print(er2)
 print((3, 6)+(8, 8))
+
+x = {"fe": ["str1", "str2", ...],
+     "na": ["rts1", "rts2", ...]}
+y = {0:("str1", "fe"),1:("str2", "fe"),2:("rts1", "na"),3:("rts2", "na")}

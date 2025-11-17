@@ -74,11 +74,22 @@ class TableBluePrint:
         self.table_name = table_name
         self.mezonevek = []
         self.PK = None
+        self.FK = {}
         self.create_sorok = []
 
-    def generate_where(self, where_mezo:tuple[int, ...], operator:LogikaiOperatorok=LogikaiOperatorok.AND, alias:str="") -> str:
+    @property
+    def TN(self) -> str:
+        return self.table_name[0:2]
 
+    def generate_where(self, where_mezo:tuple[int, ...], operator:LogikaiOperatorok=LogikaiOperatorok.AND, alias:str="") -> str:
         return f' {operator} '.join([f"{alias}" + self.mezonevek[i] + '=?' for i in where_mezo])
+
+    def J_generate_where(self, mezonevek:dict[int, tuple[str, str]],  where_mezo:tuple[int, ...], operator:LogikaiOperatorok=LogikaiOperatorok.AND) -> str:
+        darabok = []
+        for i in where_mezo:
+            mezo,alias = mezonevek[i]
+            darabok.append(f"{alias}.{mezo}=?")
+        return f' {operator.value} '.join(darabok)
 
     def Add_mezo(self, mezo_nev:str, tipus:TipusConst, adat_hossz:int=0, megkotes:MegkotesConst=MegkotesConst.URES):
         self.mezonevek.append(mezo_nev)
@@ -90,6 +101,7 @@ class TableBluePrint:
     #    self.Table_megkotes(f"PRIMARY KEY({', '.join([self.mezonevek[i] for i in indexek])})")
 
     def Add_Table_FK(self, kapcsolomezo_sajat:int, referencia_table:TableBluePrint, referencia_kapcsolomezo:int, onDelete:bool=False):
+        self.FK[referencia_table.table_name] = self.mezonevek[kapcsolomezo_sajat]
         self.Table_megkotes(f"FOREIGN KEY ({self.mezonevek[kapcsolomezo_sajat]}) REFERENCES {referencia_table.table_name} ({referencia_table.mezonevek[referencia_kapcsolomezo]}){' ON DELETE CASCADE' if onDelete else ''}")
 
     def Table_megkotes(self, megkotes:str):
@@ -111,13 +123,15 @@ class TableBluePrint:
         return f"DELETE FROM {self.table_name} WHERE {self.generate_where(where_mezo)}"
 
     def To_Join(self, kapcsolt_tabla:TableBluePrint, join_type:JoinTypes, where_mezo:tuple[int, ...]|int, operator:LogikaiOperatorok=LogikaiOperatorok.AND) -> str:
-        self_alias = self.table_name[0:2]
-        kapcsolt_alias = kapcsolt_tabla.table_name[0:2]
-
         # módosítani kell mert nem lehet Pk hoz PK-t kötni, annak nincs értelme. kezelni kell hogy egy adott táblánkak mik az idegen kulcsai, és class szinten kezelni ezt
         # vagyis ha azt mondom hogy felhasználók class hoz kötöm a napi költések class-t akkor az utóbbi tudja melyik FK-t kell adnia ami illik az első táblához.
-
-        return f"SELECT * FROM {self.table_name} {self_alias} {join_type.value} {kapcsolt_tabla.table_name} {kapcsolt_alias} ON {self_alias}.{self.PK} = {kapcsolt_alias}.{kapcsolt_tabla.PK} WHERE {self.generate_where(where_mezo, operator, self_alias+".")}"
+        mezok_dict = {}
+        i = 0
+        for key, values in zip([self.TN, kapcsolt_tabla.TN], [self.mezonevek, kapcsolt_tabla.mezonevek]):
+            for v in values:
+                mezok_dict[i] = (v, key)
+                i += 1
+        return f"SELECT * FROM {self.table_name} {self.TN} {join_type.value} {kapcsolt_tabla.table_name} {kapcsolt_tabla.TN} ON {self.TN}.{self.PK} = {kapcsolt_tabla.TN}.{kapcsolt_tabla.FK[self.table_name]} WHERE {self.J_generate_where(mezok_dict, where_mezo, operator)}"
 
 class Database:
     def __init__(self, db_path):
@@ -264,4 +278,5 @@ class Database:
     def univerzalis_join(self, tabla_index:str, kapcsolt_tabla_index:str, join_type:JoinTypes, where_mezo:tuple[int, ...]|int, where_adat:tuple|object, operator:LogikaiOperatorok=LogikaiOperatorok.AND):
         if isinstance(where_mezo, int): where_mezo, where_adat = (where_mezo,), (where_adat,)
         table_blueprint: TableBluePrint = self.tables[tabla_index]
+        print(table_blueprint.To_Join(self.tables[kapcsolt_tabla_index], join_type, where_mezo, operator))
         return self.fetch_all(table_blueprint.To_Join(self.tables[kapcsolt_tabla_index], join_type, where_mezo, operator), where_adat)
