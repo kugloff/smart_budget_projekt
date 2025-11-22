@@ -83,9 +83,9 @@ export default function LoginPage() {
         <h2>Bejelentkezés</h2>
         <form onSubmit={handleLogin}>
           <input
-            type="email"
+            type="text"
             name="email"
-            placeholder="Email cím"
+            placeholder="Email / név cím"
             value={loginData.email}
             onChange={handleLoginChange}
             required

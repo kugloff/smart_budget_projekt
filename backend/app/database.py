@@ -57,6 +57,7 @@ def init_tables() -> dict:
     koltesi_kategoriak.Add_mezo("kategoria_nev_id", TipusConst.INTEGER, megkotes=MegkotesConst.NN)
     koltesi_kategoriak.Add_Table_FK(0, napi_koltesek, 1, True)
     koltesi_kategoriak.Add_Table_FK(2, kategoria_nevek, 0)
+    koltesi_kategoriak.Table_megkotes(f"UNIQUE({koltesi_kategoriak.mezonevek[0]}, {koltesi_kategoriak.mezonevek[2]})")
     Tables["koltesi_kategoriak"] = koltesi_kategoriak
 
     koltesek = TableBluePrint("koltesek")
@@ -82,7 +83,7 @@ class TableBluePrint:
         return self.table_name[0:2]
 
     def generate_where(self, where_mezo:tuple[int, ...], operator:LogikaiOperatorok=LogikaiOperatorok.AND, alias:str="") -> str:
-        return f' {operator} '.join([f"{alias}" + self.mezonevek[i] + '=?' for i in where_mezo])
+        return f' {operator.value} '.join([f"{alias}" + self.mezonevek[i] + '=?' for i in where_mezo])
 
     def J_generate_where(self, mezonevek:dict[int, tuple[str, str]],  where_mezo:tuple[int, ...], operator:LogikaiOperatorok=LogikaiOperatorok.AND) -> str:
         darabok = []
@@ -122,7 +123,11 @@ class TableBluePrint:
     def ToDELETE_FROM(self, where_mezo:tuple[int, ...]) -> str:
         return f"DELETE FROM {self.table_name} WHERE {self.generate_where(where_mezo)}"
 
-    def To_Join(self, kapcsolt_tabla:TableBluePrint, join_type:JoinTypes, where_mezo:tuple[int, ...]|int, operator:LogikaiOperatorok=LogikaiOperatorok.AND) -> str:
+    def ToSimpleSELECT(self, where_mezo:tuple[int, ...], operator:LogikaiOperatorok, return_count:bool) -> str:
+        return f"SELECT {"count(*)" if return_count else "*"} FROM {self.table_name} WHERE {self.generate_where(where_mezo, operator)}"
+
+
+    def To_Join(self, kapcsolt_tabla:TableBluePrint, join_type:JoinTypes, where_mezo:tuple[int, ...]|int, operator:LogikaiOperatorok=LogikaiOperatorok.AND, return_count:bool=False) -> str:
         # módosítani kell mert nem lehet Pk hoz PK-t kötni, annak nincs értelme. kezelni kell hogy egy adott táblánkak mik az idegen kulcsai, és class szinten kezelni ezt
         # vagyis ha azt mondom hogy felhasználók class hoz kötöm a napi költések class-t akkor az utóbbi tudja melyik FK-t kell adnia ami illik az első táblához.
         mezok_dict = {}
@@ -131,7 +136,7 @@ class TableBluePrint:
             for v in values:
                 mezok_dict[i] = (v, key)
                 i += 1
-        return f"SELECT * FROM {self.table_name} {self.TN} {join_type.value} {kapcsolt_tabla.table_name} {kapcsolt_tabla.TN} ON {self.TN}.{self.PK} = {kapcsolt_tabla.TN}.{kapcsolt_tabla.FK[self.table_name]} WHERE {self.J_generate_where(mezok_dict, where_mezo, operator)}"
+        return f"SELECT {"count(*)" if return_count else "*"} FROM {self.table_name} {self.TN} {join_type.value} {kapcsolt_tabla.table_name} {kapcsolt_tabla.TN} ON {self.TN}.{self.PK} = {kapcsolt_tabla.TN}.{kapcsolt_tabla.FK[self.table_name]} WHERE {self.J_generate_where(mezok_dict, where_mezo, operator)}"
 
 class Database:
     def __init__(self, db_path):
@@ -254,29 +259,31 @@ class Database:
     # list<tuple> -> van adat és azt kapjuk vissza
     # bool -> kizárólag van_adat=True esetében van bool más esetben list<tuple> || True ha legalább egy rekordot ad a lekérdezés (minimum 1) || False ha a lekérdezés nem ad vissza semmit
     # [] -> ha a lekérdezés nem adott vissza egyetlen rekordot sem.
-    def egyszeru_select(self, tabla_id:str, where_mezo:tuple[int, ...], where_adat:tuple, operator:LogikaiOperatorok,van_adat:bool=False) -> list|bool: # list<tuple>
+    def egyszeru_select(self, tabla_id:str, where_mezo:tuple[int, ...], where_adat:tuple, operator:LogikaiOperatorok, return_count:bool=False) -> list|int: # list<tuple>
         table_blueprint: TableBluePrint = self.tables[tabla_id]
-        eredmeny = self.fetch_all(f"SELECT * FROM {table_blueprint.table_name} WHERE {self.generate_where(table_blueprint, where_mezo, operator)}", where_adat)
-        return eredmeny != [] if van_adat else eredmeny
+        if return_count: return self.fetch_one(table_blueprint.ToSimpleSELECT(where_mezo, operator, return_count), where_adat)[0]
+        else: return self.fetch_all(table_blueprint.ToSimpleSELECT(where_mezo, operator, return_count), where_adat)
 
-    def select_felhasznalo(self, where_mezo:tuple[int, ...]|int, where_adat:tuple|object, van_adat:bool=False, operator:LogikaiOperatorok=LogikaiOperatorok.AND) -> list|bool:
-        if isinstance(where_mezo, int): where_mezo, where_adat = (where_mezo,), (where_adat,)
-        return self.egyszeru_select("felhasznalok",where_mezo, where_adat, operator, van_adat)
-    def select_napi_koltesek(self, where_mezo:tuple[int, ...]|int, where_adat:tuple|object, van_adat:bool=False, operator:LogikaiOperatorok=LogikaiOperatorok.AND) -> list|bool:
-        if isinstance(where_mezo, int): where_mezo, where_adat = (where_mezo,), (where_adat,)
-        return self.egyszeru_select("napi_koltesek",where_mezo, where_adat, operator, van_adat)
-    def select_koltesi_kategoriak(self, where_mezo:tuple[int, ...]|int, where_adat:tuple|object, van_adat:bool=False, operator:LogikaiOperatorok=LogikaiOperatorok.AND) -> list|bool:
-        if isinstance(where_mezo, int): where_mezo, where_adat = (where_mezo,), (where_adat,)
-        return self.egyszeru_select("koltesi_kategoriak",where_mezo, where_adat, operator, van_adat)
-    def select_koltesek(self, where_mezo:tuple[int, ...]|int, where_adat:tuple|object, van_adat:bool=False, operator:LogikaiOperatorok=LogikaiOperatorok.AND) -> list|bool:
-        if isinstance(where_mezo, int): where_mezo, where_adat = (where_mezo,), (where_adat,)
-        return self.egyszeru_select("koltesek",where_mezo, where_adat, operator, van_adat)
-    def select_kategoria_nevek(self, where_mezo:tuple[int, ...]|int, where_adat:tuple|object, van_adat:bool=False, operator:LogikaiOperatorok=LogikaiOperatorok.AND) -> list|bool:
-        if isinstance(where_mezo, int): where_mezo, where_adat = (where_mezo,), (where_adat,)
-        return self.egyszeru_select("kategoria_nevek",where_mezo, where_adat, operator, van_adat)
 
-    def univerzalis_join(self, tabla_index:str, kapcsolt_tabla_index:str, join_type:JoinTypes, where_mezo:tuple[int, ...]|int, where_adat:tuple|object, operator:LogikaiOperatorok=LogikaiOperatorok.AND):
+    def select_felhasznalo(self, where_mezo:tuple[int, ...]|int, where_adat:tuple|object, operator:LogikaiOperatorok=LogikaiOperatorok.AND, return_count:bool=False) -> list|int:
+        if isinstance(where_mezo, int): where_mezo, where_adat = (where_mezo,), (where_adat,)
+        return self.egyszeru_select("felhasznalok",where_mezo, where_adat, operator, return_count)
+    def select_napi_koltesek(self, where_mezo:tuple[int, ...]|int, where_adat:tuple|object, operator:LogikaiOperatorok=LogikaiOperatorok.AND, return_count:bool=False) -> list|int:
+        if isinstance(where_mezo, int): where_mezo, where_adat = (where_mezo,), (where_adat,)
+        return self.egyszeru_select("napi_koltesek",where_mezo, where_adat, operator, return_count)
+    def select_koltesi_kategoriak(self, where_mezo:tuple[int, ...]|int, where_adat:tuple|object, operator:LogikaiOperatorok=LogikaiOperatorok.AND, return_count:bool=False) -> list|int:
+        if isinstance(where_mezo, int): where_mezo, where_adat = (where_mezo,), (where_adat,)
+        return self.egyszeru_select("koltesi_kategoriak",where_mezo, where_adat, operator, return_count)
+    def select_koltesek(self, where_mezo:tuple[int, ...]|int, where_adat:tuple|object, operator:LogikaiOperatorok=LogikaiOperatorok.AND, return_count:bool=False) -> list|int:
+        if isinstance(where_mezo, int): where_mezo, where_adat = (where_mezo,), (where_adat,)
+        return self.egyszeru_select("koltesek",where_mezo, where_adat, operator, return_count)
+    def select_kategoria_nevek(self, where_mezo:tuple[int, ...]|int, where_adat:tuple|object, operator:LogikaiOperatorok=LogikaiOperatorok.AND, return_count:bool=False) -> list|int:
+        if isinstance(where_mezo, int): where_mezo, where_adat = (where_mezo,), (where_adat,)
+        return self.egyszeru_select("kategoria_nevek",where_mezo, where_adat, operator, return_count)
+
+    def univerzalis_join(self, tabla_index:str, kapcsolt_tabla_index:str, join_type:JoinTypes, where_mezo:tuple[int, ...]|int, where_adat:tuple|object, operator:LogikaiOperatorok=LogikaiOperatorok.AND, return_count:bool=False) -> list|int:
         if isinstance(where_mezo, int): where_mezo, where_adat = (where_mezo,), (where_adat,)
         table_blueprint: TableBluePrint = self.tables[tabla_index]
-        print(table_blueprint.To_Join(self.tables[kapcsolt_tabla_index], join_type, where_mezo, operator))
-        return self.fetch_all(table_blueprint.To_Join(self.tables[kapcsolt_tabla_index], join_type, where_mezo, operator), where_adat)
+        print("univerzalis_join sql: "+table_blueprint.To_Join(self.tables[kapcsolt_tabla_index], join_type, where_mezo, operator))
+        if return_count: return self.fetch_one(table_blueprint.To_Join(self.tables[kapcsolt_tabla_index], join_type, where_mezo, operator, return_count), where_adat)[0]
+        else: return self.fetch_all(table_blueprint.To_Join(self.tables[kapcsolt_tabla_index], join_type, where_mezo, operator, return_count), where_adat)

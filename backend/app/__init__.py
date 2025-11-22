@@ -1,7 +1,7 @@
 from flask import Flask, send_from_directory, request, redirect, url_for, session, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash # 150-200 karakteres mezőt igényel legalább
 from flask_cors import CORS
-from app.database import Database
+from app.database import Database, JoinTypes
 from datetime import timedelta
 import os
 
@@ -22,11 +22,13 @@ def create_app():
         )
         return injected_html
 
+    def get_error_json(text:str):
+        return jsonify({"error": True, "info": text})
+
     def is_logged():
         if 'user_id' not in session:
             return redirect(url_for('login', msg='Nincs bejelentkezve!'))
         return True
-
     def get_kategoria_koltesek(kategoria_id:int) -> list:
         koltesek = db.select_koltesek(1, kategoria_id)
         return [{"leiras": z[2], "osszeg": z[3]} for z in koltesek]
@@ -75,9 +77,15 @@ def create_app():
                     return jsonify({"success": False, "message": "Email és jelszó megadása kötelező!"}), 400
 
                 # --- Felhasználó keresése ---
-                felhasznalo = db.select_felhasznalo(1, email)[0]
+                felhasznalo = db.select_felhasznalo(1, email)
+                if not felhasznalo:
+                    email = email.upper()
+                    felhasznalo = db.select_felhasznalo(0, email) # ha a beírt adat nem egy email akkor rápróbálunk hátha nevet adatott meg.
+
                 if not felhasznalo:
                     return jsonify({"success": False, "message": "Hibás email cím vagy jelszó!"}), 401
+
+                felhasznalo = felhasznalo[0]
 
                 # --- Jelszó ellenőrzése ---
                 if not check_password_hash(felhasznalo[2], jelszo):
@@ -94,7 +102,6 @@ def create_app():
                 app.logger.exception("Login hiba")
                 return jsonify({"success": False, "message": "Váratlan hiba történt, próbálja újra."}), 500
         return jsonify({"success":False, "message": "Invalid method!"})
-
 
     @app.route('/register', methods=["POST"])
     def register():
@@ -116,8 +123,8 @@ def create_app():
                     return jsonify({"success": False, "message": "Név, Email és jelszó megadása kötelező!"}), 400
 
                 # --- Felhasználó keresése ---
-                foglalt_nev = db.select_felhasznalo(0, name, van_adat=True)[0]
-                foglalt_email = db.select_felhasznalo(1, email, van_adat=True)[0]
+                foglalt_nev = db.select_felhasznalo(0, name, return_count=True) != 0
+                foglalt_email = db.select_felhasznalo(1, email, return_count=True) != 0
                 if foglalt_nev:
                     return jsonify({"success": False, "message": "A megadott név már foglalt!"}), 401
                 if foglalt_email:
@@ -136,46 +143,90 @@ def create_app():
                 return jsonify({"success": False, "message": "Váratlan hiba történt, próbálja újra."}), 500
         return jsonify({"success": False, "message": "Invalid method!"})
 
-    @app.route('/expenses')
+    @app.route('/expenses', methods=["GET"])
     def expenses():
         if (x := is_logged()) != True: return x # login ellenőrzés
-        return serve_react_page('expenses')
+        if request.method == "GET": return serve_react_page('expenses')
+        return get_error_json("Invalid method!")
 
-    @app.route("/api/get_napi_koltesek")
+    # GET - lekéri az összeset, a POST-al pedig csak egy adott napot
+    @app.route("/api/get_napi_koltesek", methods=["GET", "POST"])
     def get_napi_koltesek():
         if (x := is_logged()) != True: return x # login ellenőrzés
         eredmeny = {}
-        napok = db.select_napi_koltesek(0, session['user_id'])
-        for i in napok:
-            datum = i[2]
-            eredmeny[datum] = get_nap_kategoriak(i[1])
-        return jsonify(eredmeny)
+        if request.method == "GET":
+            napok = db.select_napi_koltesek(0, session['user_id'])
+            for i in napok:
+                datum = i[2]
+                eredmeny[datum] = get_nap_kategoriak(i[1])
+            return jsonify(eredmeny)
+        if request.method == "POST":
+            data = request.get_json(silent=True)
+            if not data:
+                return get_error_json("Hiányzó JSON!")
+            if "datum" not in data:
+                return get_error_json("A 'datum' mező nem létezik!")
 
-    @app.route("/api/add_napi_koltes")
+            napok = db.select_napi_koltesek((0, 2), (session['user_id'], data["datum"]))
+            for i in napok:
+                datum = i[2]
+                eredmeny[datum] = get_nap_kategoriak(i[1])
+            return jsonify(eredmeny)
+        return get_error_json("Invalid method!")
+
+    # hozzáad egy új "üres" napot
+    @app.route("/api/add_napi_koltes", methods=["POST"])
     def add_napi_koltes():
         if (x := is_logged()) != True: return x # login ellenőrzés
-        data = request.get_json()
-        uj_datum = data.get("datum")
-        if uj_datum is None: return jsonify({"error": True, "info": "A dátum mező nem létezik!"})
+        if request.method == "POST":
+            data = request.get_json(silent=True)
+            if not data:
+                return get_error_json("Hiányzó JSON!")
+            if "datum" not in data:
+                return get_error_json("A 'datum' mező nem létezik!")
 
-        if not db.add_napi_koltes(session['user_id'], uj_datum):
-            return jsonify({"error": True, "info": "A kért nap nem hozzáadható!"})
-        return jsonify({"error": False,"info": "Sikeres hozzáadás!"})
+            if not db.add_napi_koltes(session['user_id'], data["datum"]):
+                return get_error_json("A kért nap nem hozzáadható!")
+            return jsonify({"error": False,"info": "Sikeres hozzáadás!"})
+        return get_error_json("Invalid method!")
 
-    @app.route("/api/get_koltes_kategoria/<string:date>/<string:kategoria_nev>")
-    def get_koltes_kategoria(date:str, kategoria_nev:str):
-        kategoria_nev_id = db.select_kategoria_nevek((1, 3), (kategoria_nev, session['user_id']))[0][0]
-        koltesi_kategoria = db.select_koltesi_kategoriak((), ()) # ezen a ponton van szükség hogy join-t is tudjon kezelni az adatbázis!
+    # visszaadja azt az egy költési kategóriához tartozó költéseket melyet a paraméterek pontosan meghatároznak. {"koltesek": [...]} formában (ugyan úgy mint az összes nap lekérésénél)
+    @app.route("/api/get_koltes_kategoria", methods=["POST"])
+    def get_koltes_kategoria():
+        if (x := is_logged()) != True: return x  # login ellenőrzés
+        if request.method == "POST":
+            data = request.get_json(silent=True)
+            if not data:
+                return get_error_json("Hiányzó JSON!")
+
+            date = data.get("date")
+            kategoria_nev = data.get("kategoria_nev")
+
+            if not date or not kategoria_nev:
+                return get_error_json("Hiányzó mezők!")
+
+            adat = db.select_kategoria_nevek((1, 3), (kategoria_nev, session['user_id']))
+            if len(adat) == 1:
+                kategoria_nev_id = adat[0][0] # [(1, 'Utazás', 'FFAA33', 'VVZDMQ')] <- ebből kinyerük az id-t
+            else: return get_error_json("A megadott kategória név nem létezik.")
+            koltesi_kategoria = db.univerzalis_join("napi_koltesek", "koltesi_kategoriak", JoinTypes.INNER, (2,5), (date, kategoria_nev_id))
+            if len(koltesi_kategoria) != 1: return get_error_json("A kért költési kategória nem létezik!")
+            # a költési koltesi_kategoria adat minta: [('VVZDMQ', 1, '2025-11-9', 1, 2, 4)]
+            kategoia_koltesek = get_kategoria_koltesek(koltesi_kategoria[0][4])
+            return jsonify({"koltesek": kategoia_koltesek})
+        return get_error_json("Invalid method!")
 
     @app.route('/analysis')
     def analysis():
         if (x := is_logged()) != True: return x # login ellenőrzés
-        return serve_react_page('analysis')
+        if request.method == "GET": return serve_react_page('analysis')
+        return get_error_json("Invalid method!")
 
     @app.route('/ai')
     def ai():
         if (x := is_logged()) != True: return x # login ellenőrzés
-        return serve_react_page('ai')
+        if request.method == "GET": return serve_react_page('ai')
+        return get_error_json("Invalid method!")
 
     # statikus fájlok (JS, CSS)
     @app.route('/static/<path:filename>')

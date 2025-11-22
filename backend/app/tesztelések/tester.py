@@ -98,26 +98,46 @@ def get_napi_koltesek2():
 #print("Kategória nevek tábla: ", db.select_kategoria_nevek(3, USER))
 
 
-#db.add_koltesek(1, "Kitalált Tisza adó", 3500)
-#db.add_koltesek(1, "Kitalált Tisza adó2", 33_000)
+'''
+db.execute("DELETE FROM koltesek")
+db.execute("DELETE FROM koltesi_kategoriak")
+db.execute("DELETE FROM napi_koltesek")
 
-#db.add_koltesek(2, "Családi adókedvezmény", 99_000)
-#db.add_koltesek(2, "Babaváróhitel törlesztés", 10_000)
+db.add_napi_koltes(USER, "2025-11-9")
+db.add_napi_koltes(USER, "2025-11-22")
 
-#db.add_koltesek(3, "Kínai út", 50_000)
-#db.add_koltesek(3, "Kocsmai látogatás", 900)
+db.add_koltesi_kategoria(1, 1)
+db.add_koltesi_kategoria(1, 4)
+db.add_koltesi_kategoria(2, 2)
+db.add_koltesi_kategoria(2, 3)
 
-#db.add_koltesek(4, "Csak egy zápor", 1_000_000)
-#db.add_koltesek(4, "33%-os tortaelvétel", 50_000_000)
-#db.add_koltesek(4, "Láda gyémánt 33% ", 50_000_000)
+db.add_koltesek(1, "Kitalált Tisza adó", 3500)
+db.add_koltesek(1, "Kitalált Tisza adó2", 33_000)
+
+db.add_koltesek(2, "Családi adókedvezmény", 99_000)
+db.add_koltesek(2, "Babaváróhitel törlesztés", 10_000)
+
+db.add_koltesek(3, "Kínai út", 50_000)
+db.add_koltesek(3, "Kocsmai látogatás", 900)
+
+db.add_koltesek(4, "Csak egy zápor", 1_000_000)
+db.add_koltesek(4, "33%-os tortaelvétel", 50_000_000)
+db.add_koltesek(4, "Láda gyémánt 33% ", 50_000_000)
+'''
+
+
+
 
 print("-"*50)
 #a = get_napi_koltesek1()
 #b = get_napi_koltesek2()
 #print(b == a)
 
-er = db.egyszeru_select("felhasznalok", (0, 1, 2), (22, 33, 55), "AND")
-er2 = db.univerzalis_join("felhasznalok", "napi_koltesek", JoinTypes.LEFT, (0, 4, 6), ("VVZDMQ", "IDK ki", "2025")) # ez nem jó mert PK hoz kötünk PK-t
+#er = db.egyszeru_select("felhasznalok", (0, 1, 2), (22, 33, 55), "AND")
+#er2 = db.univerzalis_join("felhasznalok", "napi_koltesek", JoinTypes.LEFT, (0, 4, 6), ("VVZDMQ", "IDK ki", "2025"), return_count=True)
+#er2 = db.univerzalis_join("napi_koltesek", "koltesi_kategoriak", JoinTypes.INNER, (2,5), ("2025-11-9", 4))
+er2 = db.select_napi_koltesek((0, 2), (USER, "2025-11-9"))
+
 print(er2)
 print((3, 6)+(8, 8))
 
