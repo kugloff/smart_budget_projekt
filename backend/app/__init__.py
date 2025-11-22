@@ -162,7 +162,7 @@ def create_app():
             return jsonify({"error": True, "info": "A kért nap nem hozzáadható!"})
         return jsonify({"error": False,"info": "Sikeres hozzáadás!"})
 
-    @app.route("/api/get_koltes_kategoria/<str:date>/<str:kategoria_nev>")
+    @app.route("/api/get_koltes_kategoria/<string:date>/<string:kategoria_nev>")
     def get_koltes_kategoria(date:str, kategoria_nev:str):
         kategoria_nev_id = db.select_kategoria_nevek((1, 3), (kategoria_nev, session['user_id']))[0][0]
         koltesi_kategoria = db.select_koltesi_kategoriak((), ()) # ezen a ponton van szükség hogy join-t is tudjon kezelni az adatbázis!
