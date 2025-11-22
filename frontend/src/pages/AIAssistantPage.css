@@ -1,0 +1,64 @@
+.page-container{
+    padding: 30px 0;
+    min-height: 100vh;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.card{
+    width: 100%;
+    max-width: 700px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    border: 1px solid #ddd;
+}
+
+.card-content{
+    padding: 40px;
+}
+
+.subtitle{
+    text-align: center;
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.button-grid{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.action-btn{
+    width: 100%;
+    padding: 15px;
+    font-size: 16px;
+    border: none;
+    background: #4a90e2;
+    color: white;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.action-btn:hover:not(:disabled){
+    background: #3b7ac4;
+}
+
+.action-btn:disabled{
+    background: #9bbce0;
+    cursor: not-allowed;
+}
+
+.response-box{
+    background: #fafafa;
+    border-radius: 12px;
+    padding: 15px;
+    min-height: 120px;
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.05);
+    white-space: pre-wrap;
+}
