@@ -1,16 +1,20 @@
 import React from "react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
-const BarChartExpenses = ({ data }) => (
-  <ResponsiveContainer width="100%" height={300}>
-    <BarChart data={data}>
-      <CartesianGrid strokeDasharray="3 3" />
-      <XAxis dataKey="month" />
-      <YAxis />
-      <Tooltip />
-      <Bar dataKey="amount" fill="#8884d8" />
-    </BarChart>
-  </ResponsiveContainer>
-);
+export default function BarChartExpenses({ data }) {
+  const fixedData = data.map(item => ({
+    name: item.honap + ". hó",
+    value: item.osszeg
+  }));
 
-export default BarChartExpenses;
+  return (
+    <ResponsiveContainer width="100%" height={300}>
+      <BarChart data={fixedData}>
+        <XAxis dataKey="name" />
+        <YAxis />
+        <Tooltip />
+        <Bar dataKey="value" fill="#3b82f6" />
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}

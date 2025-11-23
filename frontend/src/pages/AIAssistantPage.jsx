@@ -10,7 +10,7 @@ export default function AIAssistantPage() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const res = await fetch('/api/get_napi_koltesek'); 
+        const res = await fetch('/get_napi_koltesek'); 
         const data = await res.json();
         setUserData(data);
       } catch (err) {

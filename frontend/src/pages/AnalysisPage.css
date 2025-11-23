@@ -38,6 +38,13 @@
     margin: 0 8px;
 }
 
+.no-data{
+  text-align: center;
+  color: #ccc;
+  font-style: italic;
+  margin-top: 20px;
+}
+
 .charts{
     display: flex;
     flex-direction: column;

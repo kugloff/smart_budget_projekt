@@ -269,11 +269,76 @@ def create_app():
         if request.method == "GET": return serve_react_page('analysis')
         return get_error_json("Invalid method!")
 
+    #AI
     @app.route('/ai')
     def ai():
         if (x := is_logged()) != True: return x # login ellenőrzés
         if request.method == "GET": return serve_react_page('ai')
         return get_error_json("Invalid method!")
+    
+    @app.route("/api/analysis/monthly/<int:year>")
+    def analysis_monthly(year):
+        if (x := is_logged()) != True: return x
+        
+        print("MONTHLY lekérdezés YEAR =", year)
+        print("USER =", session.get('user_id'))
+
+        query = """
+            SELECT 
+                strftime('%m', nk.datum) AS honap,
+                SUM(k.osszeg) AS osszeg
+            FROM napi_koltesek nk
+            JOIN koltesi_kategoriak kk ON nk.kategoria_csoport_id = kk.kategoria_csoport_id
+            JOIN koltesek k ON kk.koltes_id = k.koltes_id
+            WHERE nk.user_id = ?
+            AND strftime('%Y', nk.datum) = ?
+            GROUP BY honap
+            ORDER BY honap
+        """
+
+        rows = db.fetch_all(query, (session['user_id'], str(year)))
+
+        print("MONTHLY RAW ROWS =", rows)  # <-- EZ A LEGFONTOSABB
+
+        formatted = [{"honap": r[0], "osszeg": r[1]} for r in rows]
+
+        print("MONTHLY FORMATTED =", formatted)
+
+        return jsonify(formatted)
+
+    
+    @app.route("/api/analysis/category/<int:year>")
+    def analysis_category(year):
+        if (x := is_logged()) != True: return x
+
+        print("CATEGORY lekérdezés YEAR =", year)
+        print("USER =", session.get('user_id'))
+
+        query = """
+            SELECT 
+                kn.nev AS category, 
+                SUM(k.osszeg) AS value
+            FROM napi_koltesek nk
+            JOIN koltesi_kategoriak kk ON nk.kategoria_csoport_id = kk.kategoria_csoport_id
+            JOIN koltesek k ON kk.koltes_id = k.koltes_id
+            JOIN kategoria_nevek kn ON kk.kategoria_nev_id = kn.id
+            WHERE nk.user_id = ?
+            AND strftime('%Y', nk.datum) = ?
+            GROUP BY kn.nev
+        """
+
+        rows = db.fetch_all(query, (session['user_id'], str(year)))
+
+        print("CATEGORY RAW ROWS =", rows)
+
+        formatted = [{"category": r[0], "value": r[1]} for r in rows]
+
+        print("CATEGORY FORMATTED =", formatted)
+
+        return jsonify(formatted)
+
+
+
 
     # statikus fájlok (JS, CSS)
     @app.route('/static/<path:filename>')

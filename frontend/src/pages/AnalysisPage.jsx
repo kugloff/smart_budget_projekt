@@ -1,35 +1,76 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import BarChartExpenses from "../components/Charts/BarChart";
 import PieChartCategories from "../components/Charts/PieChart";
 import "./AnalysisPage.css";
 
 export default function AnalysisPage() {
 
-  // backend - adott évhez tartozó expenses adatok
-  //         - adott évhez tartozó kategória csoportok
+  const currentYear = new Date().getFullYear();
+  const [year, setYear] = useState(currentYear);
+
+  const [expenses, setExpenses] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const loadData = async (year) => {
+    setLoading(true);
+
+    try {
+      console.log("Fetching analysis for year:", year);
+
+      const res1 = await fetch(`/api/analysis/monthly/${year}`);
+      const monthly = await res1.json();
+      console.log("MONTHLY RECEIVED:", monthly);
+
+      const res2 = await fetch(`/api/analysis/category/${year}`);
+      const cats = await res2.json();
+      console.log("CATEGORY RECEIVED:", cats);
+
+      setExpenses(monthly);
+      setCategories(cats);
+
+    } catch (err) {
+      console.error("Hiba az analysis fetch-ben:", err);
+    }
+
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    loadData(year);
+  }, [year]);
 
   return (
     <div className="analysis-page">
       <div className="header">
-        {/* év váltása itt lenne a fetch */}
-        <button>◀ Előző év</button>
-        <span className="year-label">2025</span>
-        <button>Következő év ▶</button>
+        <button onClick={() => setYear(y => y - 1)}>◀ Előző év</button>
+        <span className="year-label">{year}</span>
+        <button onClick={() => setYear(y => y + 1)}>Következő év ▶</button>
       </div>
 
-      <div className="charts">
-        <div>
-          <h3>Havi kiadások</h3>
-          {/* expenses adatok */}
-          {/* <BarChartExpenses data={expenses} /> (fontos a data mindkét esetben, mert a chartok ezt várják()*/}
-        </div>
+      {loading ? (
+        <p className="loading">Betöltés...</p>
+      ) : (
+        <div className="charts">
+          <div>
+            <h3>Havi kiadások</h3>
+            {expenses.length > 0 ? (
+              <BarChartExpenses data={expenses} />
+            ) : (
+              <p className="no-data">Nincsenek kiadások az adott évre.</p>
+            )}
+          </div>
 
-        <div>
-          <h3>Kategóriák százalékos megoszlása</h3>
-          {/* categories adatok */}
-          {/* <PieChartCategories data={categories} /> */}
+          <div>
+            <h3>Kategóriák százalékos megoszlása</h3>
+            {categories.length > 0 ? (
+              <PieChartCategories data={categories} />
+            ) : (
+              <p className="no-data">Nincsenek kategóriák az adott évre.</p>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
