@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
 import "./AIAssistantPage.css";
 
 export default function AIAssistantPage() {
@@ -6,11 +7,10 @@ export default function AIAssistantPage() {
   const [response, setResponse] = useState("");
   const [userData, setUserData] = useState(null);
 
-  //lekéri az adatokat az adatbázisból
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const res = await fetch('/get_napi_koltesek'); 
+        const res = await fetch('/api/get_napi_koltesek'); 
         const data = await res.json();
         setUserData(data);
       } catch (err) {
@@ -30,16 +30,15 @@ export default function AIAssistantPage() {
     setLoading(true);
     setResponse("");
 
-    //ez lenne az új végpont, amit majd az api híváshoz használunk
     try {
-      const res = await fetch("/api/google-ai", {
+      const res = await fetch("/api/ai-analysis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mode, userData }),
       });
 
       const data = await res.json();
-      setResponse(data.result || "Nincs válasz.");
+      setResponse(data.result || data.info || "Nincs válasz.");
     } catch (err) {
       setResponse("Hiba történt az AI hívás közben.");
     }
@@ -75,7 +74,11 @@ export default function AIAssistantPage() {
           </div>
 
           <div className="response-box">
-            {response ? response : (!userData ? "Felhasználói adatok betöltése..." : "AI válasza itt fog megjelenni...")}
+            {response 
+              ? <ReactMarkdown>{response}</ReactMarkdown> 
+              : (!userData 
+                  ? "Felhasználói adatok betöltése..." 
+                  : "AI válasza itt fog megjelenni...")}
           </div>
         </div>
       </div>

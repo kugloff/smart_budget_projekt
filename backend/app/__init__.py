@@ -4,6 +4,9 @@ from flask_cors import CORS
 from app.database import Database, JoinTypes
 from datetime import timedelta
 import os
+import json
+from google import genai
+from dotenv import load_dotenv
 
 db_path = os.path.join(os.path.dirname(__file__), "database.db")
 db:Database = Database(db_path)
@@ -263,17 +266,11 @@ def create_app():
             else: return get_error_json("A kért költés nem hozzáadható!")
         return get_error_json("Invalid method!")
 
+    #analysis
     @app.route('/analysis')
     def analysis():
-        if (x := is_logged()) != True: return x # login ellenőrzés
+        if (x := is_logged()) != True: return x
         if request.method == "GET": return serve_react_page('analysis')
-        return get_error_json("Invalid method!")
-
-    #AI
-    @app.route('/ai')
-    def ai():
-        if (x := is_logged()) != True: return x # login ellenőrzés
-        if request.method == "GET": return serve_react_page('ai')
         return get_error_json("Invalid method!")
     
     @app.route("/api/analysis/monthly/<int:year>")
@@ -327,6 +324,68 @@ def create_app():
         formatted = [{"category": r[0], "value": r[1]} for r in rows]
 
         return jsonify(formatted)
+    
+    #AI
+    load_dotenv()
+    API_KEY = os.getenv('API_KEY')
+    client = genai.Client(api_key=API_KEY)
+
+    @app.route('/ai')
+    def ai():
+        if (x := is_logged()) != True: return x
+        if request.method == "GET": return serve_react_page('ai')
+        return get_error_json("Invalid method!")
+    
+    @app.route("/api/ai-analysis", methods=["POST"])
+    def ai_analysis():
+        if (x := is_logged()) != True: 
+            return x
+
+        data = request.get_json(silent=True)
+        if not data or "mode" not in data or "userData" not in data:
+            return jsonify({"error": True, "info": "Hiányzó adatok!"})
+
+        mode = data["mode"]  # "all" vagy "year"
+        user_data = data["userData"]
+
+        prompt = f"""
+            Te egy pénzügyi asszisztens vagy, aki a felhasználót tájékoztatja a pénzügyi helyzetéről.
+            Kérlek elemezd a felhasználó pénzügyi adatait a következő módban: {mode}.
+            Az adatok: {user_data}
+
+            Szabályok:
+            1. Fogadd el a felhasználó adatait tényként, ne kérdőjelezz meg semmit.
+            2. Adj részletes, könnyen érthető pénzügyi elemzést és tanácsot.
+            3. Minden összeget forintban (Ft) jeleníts meg.
+            4. Használj Markdown-t, hogy a szöveg olvasható legyen.
+            5. Táblázatokat ne használj; a bontás legyen felsorolás vagy egyszerű lista formátumban.
+            6. Írd a választ úgy, mintha a felhasználóval beszélgetnél, barátságosan és közérthetően.
+            7. A felhasználó nem tud válaszolni a válaszodra, ezért ne kezdeményezz további beszélgetést.
+
+            Az elemzés tartalmazza:
+            - Összegzést és kategóriánkénti bontást
+            - Napi és összesített kiadásokat
+            - Legnagyobb egyedi kiadásokat
+            - Pénzügyi tanácsokat a költségvetés, megtakarítás és optimalizálás szempontjából
+
+            A stílus legyen közvetlen, beszélgető, és segítsen a felhasználónak megérteni a pénzügyi helyzetét.
+        """
+
+        try:
+            response = client.models.generate_content(
+                model="gemini-2.0-flash",
+                contents=[prompt]
+            )
+
+            result_text = "".join([part.text for part in response.candidates[0].content.parts])
+
+            return jsonify({"result": result_text})
+
+        except Exception as e:
+            return jsonify({"error": True, "info": f"AI hívás sikertelen: {str(e)}"})
+
+
+
 
     # statikus fájlok (JS, CSS)
     @app.route('/static/<path:filename>')
