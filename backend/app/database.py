@@ -257,7 +257,7 @@ class Database:
 
     # különböző lekérések
     # list<tuple> -> van adat és azt kapjuk vissza
-    # bool -> kizárólag van_adat=True esetében van bool más esetben list<tuple> || True ha legalább egy rekordot ad a lekérdezés (minimum 1) || False ha a lekérdezés nem ad vissza semmit
+    # int -> kizárólag return_count=True esetében van más esetben list<tuple> || A paramétert használva a lekért rekordok számát adja vissza (count)
     # [] -> ha a lekérdezés nem adott vissza egyetlen rekordot sem.
     def egyszeru_select(self, tabla_id:str, where_mezo:tuple[int, ...], where_adat:tuple, operator:LogikaiOperatorok, return_count:bool=False) -> list|int: # list<tuple>
         table_blueprint: TableBluePrint = self.tables[tabla_id]

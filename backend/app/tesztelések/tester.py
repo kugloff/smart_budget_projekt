@@ -26,6 +26,7 @@ USER = "VVZDMQ"
 >> {'2025-11-10': { 
                     'Utazás': {
                            'szin_kod': 'FFAA33',
+                           'koltes_id': 1,
                            'koltesek': [
                                     {'leiras': 'Családi adókedvezmény','osszeg': 99000},
                                     {'leiras': 'Babaváróhitel törlesztés', 'osszeg': 10000}
@@ -33,6 +34,7 @@ USER = "VVZDMQ"
                                 },
                     'AI propaganda': {
                                 'szin_kod': 'BABAFF',
+                                'koltes_id': 2,
                                 'koltesek': [
                                         {'leiras': 'Családi adókedvezmény', 'osszeg': 99000},
                                                {'leiras': 'Babaváróhitel törlesztés', 'osszeg': 10000}
@@ -42,6 +44,7 @@ USER = "VVZDMQ"
  '2025-11-9': {
                 'Tisza adó': {
                         'szin_kod': 'AAFF11',
+                        'koltes_id': 3,
                         'koltesek': [
                                 {'leiras': 'Kitalált Tisza adó','osszeg': 3500},
                                 {'leiras': 'Kitalált Tisza adó2','osszeg': 33000}
@@ -49,6 +52,7 @@ USER = "VVZDMQ"
                           },
                 'Fidesz adó': {
                         'szin_kod': '5467FF',
+                        'koltes_id': 4,
                         'koltesek': [
                                 {'leiras': 'Kitalált Tisza adó', 'osszeg': 3500},
                                 {'leiras': 'Kitalált Tisza adó2','osszeg': 33000}
@@ -64,34 +68,22 @@ def get_kategoria_koltesek(kategoria_id: int) -> list:
     koltesek = db.select_koltesek(1, kategoria_id)
     return [{"leiras": z[2], "osszeg": z[3]} for z in koltesek]
 
-def get_nap_kategoriak(nap_id:int) -> dict:
+def get_nap_kategoriak(nap_id: int) -> dict:
     end = {}
     for y in db.select_koltesi_kategoriak(0, nap_id):
         kategoria_nevek = db.select_kategoria_nevek(0, y[2])[0]
-        end[kategoria_nevek[1]] = {"szin_kod": kategoria_nevek[2], "koltesek": get_kategoria_koltesek(y[0])}
+        end[kategoria_nevek[1]] = {"szin_kod": kategoria_nevek[2], "koltes_id":y[1], "koltesek": get_kategoria_koltesek(y[0])}
     return end
 
-def get_napi_koltesek1():
-    eredmeny = {}
-    napok = db.select_napi_koltesek(0, USER)
-    for i in napok:
-        datum = i[2]
-        eredmeny[datum] = {}
-        koltesi_kategoriak = db.select_koltesi_kategoriak(0, i[1])
-        for y in koltesi_kategoriak:
-            kategoria_nevek = db.select_kategoria_nevek(0, y[2])[0]
-            k_nev = kategoria_nevek[1]
-            k_szin = kategoria_nevek[2]
-            eredmeny[datum][k_nev] = {"szin_kod": k_szin, "koltesek": get_kategoria_koltesek(y[0])}
-    return eredmeny
-
-def get_napi_koltesek2():
+def get_napi_koltesek():
     eredmeny = {}
     napok = db.select_napi_koltesek(0, USER)
     for i in napok:
         datum = i[2]
         eredmeny[datum] = get_nap_kategoriak(i[1])
     return eredmeny
+
+print(get_napi_koltesek())
 
 #print("Napi költések tábla: ", db.select_napi_koltesek(0, USER))
 #print("koltesi kategóriák tábla: ", db.fetch_all("select * from koltesi_kategoriak"))
@@ -136,11 +128,9 @@ print("-"*50)
 #er = db.egyszeru_select("felhasznalok", (0, 1, 2), (22, 33, 55), "AND")
 #er2 = db.univerzalis_join("felhasznalok", "napi_koltesek", JoinTypes.LEFT, (0, 4, 6), ("VVZDMQ", "IDK ki", "2025"), return_count=True)
 #er2 = db.univerzalis_join("napi_koltesek", "koltesi_kategoriak", JoinTypes.INNER, (2,5), ("2025-11-9", 4))
-er2 = db.select_napi_koltesek((0, 2), (USER, "2025-11-9"))
+#er2 = db.select_napi_koltesek((0, 2), (USER, "2025-11-9"))
+er2 = db.add_koltesi_kategoria(1, 2)
+
+
 
 print(er2)
-print((3, 6)+(8, 8))
-
-x = {"fe": ["str1", "str2", ...],
-     "na": ["rts1", "rts2", ...]}
-y = {0:("str1", "fe"),1:("str2", "fe"),2:("rts1", "na"),3:("rts2", "na")}
