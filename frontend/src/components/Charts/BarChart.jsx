@@ -3,7 +3,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recha
 
 export default function BarChartExpenses({ data }) {
   const fixedData = data.map(item => ({
-    name: item.honap + ". hó",
+    name: item.honap,
     value: item.osszeg
   }));
 
