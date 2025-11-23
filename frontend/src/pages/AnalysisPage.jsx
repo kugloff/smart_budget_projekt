@@ -16,15 +16,11 @@ export default function AnalysisPage() {
     setLoading(true);
 
     try {
-      console.log("Fetching analysis for year:", year);
-
       const res1 = await fetch(`/api/analysis/monthly/${year}`);
       const monthly = await res1.json();
-      console.log("MONTHLY RECEIVED:", monthly);
 
       const res2 = await fetch(`/api/analysis/category/${year}`);
       const cats = await res2.json();
-      console.log("CATEGORY RECEIVED:", cats);
 
       setExpenses(monthly);
       setCategories(cats);

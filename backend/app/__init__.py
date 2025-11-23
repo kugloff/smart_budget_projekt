@@ -298,14 +298,9 @@ def create_app():
 
         rows = db.fetch_all(query, (session['user_id'], str(year)))
 
-        print("MONTHLY RAW ROWS =", rows)  # <-- EZ A LEGFONTOSABB
-
         formatted = [{"honap": r[0], "osszeg": r[1]} for r in rows]
 
-        print("MONTHLY FORMATTED =", formatted)
-
         return jsonify(formatted)
-
     
     @app.route("/api/analysis/category/<int:year>")
     def analysis_category(year):
@@ -329,16 +324,9 @@ def create_app():
 
         rows = db.fetch_all(query, (session['user_id'], str(year)))
 
-        print("CATEGORY RAW ROWS =", rows)
-
         formatted = [{"category": r[0], "value": r[1]} for r in rows]
 
-        print("CATEGORY FORMATTED =", formatted)
-
         return jsonify(formatted)
-
-
-
 
     # statikus fájlok (JS, CSS)
     @app.route('/static/<path:filename>')
