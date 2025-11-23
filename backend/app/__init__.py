@@ -238,10 +238,29 @@ def create_app():
                 return get_error_json("A megadott napi költés nem létezik!")
             er2 = db.add_koltesi_kategoria(er[1], kategoria_nev_id)
             if not er2:
-                return get_error_json("A kért nap nem hozzáadható!")
+                return get_error_json("A kért költési kategória nem hozzáadható!")
             elif er2.startswith("UNIQUE"):
                 return get_error_json("Minden naphoz csak egyszer szerepelhet ugyanaz a kategória!")
             return jsonify({"error": False, "info": "Sikeres hozzáadás!"})
+        return get_error_json("Invalid method!")
+
+    # hozzáad egy új költést egy kölotési kategóriához, paraméterek: koltes_id, osszeg, leiras=None
+    @app.route("/api/add_koltes", methods=["POST"])
+    def add_koltes():
+        if request.method == "POST":
+            data = request.get_json(silent=True)
+            if not data:
+                return get_error_json("Hiányzó JSON!")
+            if "koltes_id" not in data or "osszeg" not in data:
+                return get_error_json("Hiányzó mezők!, (koltes_id, osszeg)")
+            koltes_id = data["koltes_id"]
+            osszeg = data["osszeg"]
+            if "leiras" not in data: leiras = None
+            else: leiras = data["leiras"]
+
+            er = db.add_koltesek(koltes_id, leiras, osszeg)
+            if er == True: return jsonify({"error": False, "info": "Sikeres hozzáadás!"})
+            else: return get_error_json("A kért költés nem hozzáadható!")
         return get_error_json("Invalid method!")
 
     @app.route('/analysis')
