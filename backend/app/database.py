@@ -124,19 +124,26 @@ class TableBluePrint:
         return f"DELETE FROM {self.table_name} WHERE {self.generate_where(where_mezo)}"
 
     def ToSimpleSELECT(self, where_mezo:tuple[int, ...], operator:LogikaiOperatorok, return_count:bool) -> str:
-        return f"SELECT {"count(*)" if return_count else "*"} FROM {self.table_name} WHERE {self.generate_where(where_mezo, operator)}"
-
+        return f"SELECT {'count(*)' if return_count else '*'} FROM {self.table_name} WHERE {self.generate_where(where_mezo, operator)}"
 
     def To_Join(self, kapcsolt_tabla:TableBluePrint, join_type:JoinTypes, where_mezo:tuple[int, ...]|int, operator:LogikaiOperatorok=LogikaiOperatorok.AND, return_count:bool=False) -> str:
-        # módosítani kell mert nem lehet Pk hoz PK-t kötni, annak nincs értelme. kezelni kell hogy egy adott táblánkak mik az idegen kulcsai, és class szinten kezelni ezt
-        # vagyis ha azt mondom hogy felhasználók class hoz kötöm a napi költések class-t akkor az utóbbi tudja melyik FK-t kell adnia ami illik az első táblához.
         mezok_dict = {}
         i = 0
         for key, values in zip([self.TN, kapcsolt_tabla.TN], [self.mezonevek, kapcsolt_tabla.mezonevek]):
             for v in values:
                 mezok_dict[i] = (v, key)
                 i += 1
-        return f"SELECT {"count(*)" if return_count else "*"} FROM {self.table_name} {self.TN} {join_type.value} {kapcsolt_tabla.table_name} {kapcsolt_tabla.TN} ON {self.TN}.{self.PK} = {kapcsolt_tabla.TN}.{kapcsolt_tabla.FK[self.table_name]} WHERE {self.J_generate_where(mezok_dict, where_mezo, operator)}"
+
+        select_expr = 'count(*)' if return_count else '*'
+        where_expr = self.J_generate_where(mezok_dict, where_mezo, operator)
+
+        return (
+            f"SELECT {select_expr} "
+            f"FROM {self.table_name} {self.TN} "
+            f"{join_type.value} {kapcsolt_tabla.table_name} {kapcsolt_tabla.TN} "
+            f"ON {self.TN}.{self.PK} = {kapcsolt_tabla.TN}.{kapcsolt_tabla.FK[self.table_name]} "
+            f"WHERE {where_expr}"
+        )
 
 class Database:
     def __init__(self, db_path):

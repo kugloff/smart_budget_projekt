@@ -7,11 +7,17 @@ export const DayCard = ({ dayData, onDelete }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
 
-  // backend - a nap és kategóriák adatai
-  //         - MINDENHOL ahol {nap} van, oda majd helyettesíteni kell
-  //         - amik megmaradtak metódusok, kellenek a frontendhez
-  // const date = {nap}.date;
-  // const categories = {nap}.categories;
+  // A backendből jövő adatok:
+  const date = dayData.date || dayData.datum;
+  const categories = Array.isArray(dayData.categories)
+    ? dayData.categories
+    : [];
+
+  // Napi összeg
+  const dayTotal = categories.reduce(
+    (sum, c) => sum + (c.amount ?? c.osszeg ?? 0),
+    0
+  );
 
   const handleEditClick = () => {
     if (!isOpen) setIsOpen(true);
@@ -19,7 +25,7 @@ export const DayCard = ({ dayData, onDelete }) => {
   };
 
   const handleToggleOpen = () => {
-    setIsOpen(prev => {
+    setIsOpen((prev) => {
       if (prev) setIsEdit(false);
       return !prev;
     });
@@ -32,11 +38,16 @@ export const DayCard = ({ dayData, onDelete }) => {
     <div className="day-card">
       <div className="day-header">
         <div className="day-info">
-          <strong>{{nap}.date.replace(/-/g, ".") + "."}</strong>
+          <strong>{date.replace(/-/g, ".") + "."}</strong>
+
           {!isOpen && (
             <div className="day-category-dots">
-              {{nap}.categories.map((cat, i) => (
-                <span key={i} className="small-dot" style={{ backgroundColor: cat.color }} />
+              {categories.map((cat, i) => (
+                <span
+                  key={i}
+                  className="small-dot"
+                  style={{ backgroundColor: cat.color || cat.kategoria_szin || "#999" }}
+                />
               ))}
             </div>
           )}
@@ -44,18 +55,29 @@ export const DayCard = ({ dayData, onDelete }) => {
 
         <div className="day-actions-total">
           <div className="day-total">{dayTotal.toLocaleString()} Ft</div>
+
           {!isEdit && (
             <>
-              <button onClick={handleEditClick}><Edit3 size={20} /></button>
-              <button onClick={onDelete}><Trash2 size={20} /></button>
+              <button onClick={handleEditClick}>
+                <Edit3 size={20} />
+              </button>
+              <button onClick={onDelete}>
+                <Trash2 size={20} />
+              </button>
             </>
           )}
+
           {isEdit && (
             <>
-              <button onClick={handleSave}><Save size={20} /></button>
-              <button onClick={handleCancel}><X size={20} /></button>
+              <button onClick={handleSave}>
+                <Save size={20} />
+              </button>
+              <button onClick={handleCancel}>
+                <X size={20} />
+              </button>
             </>
           )}
+
           <button onClick={handleToggleOpen}>
             {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
           </button>
@@ -64,19 +86,17 @@ export const DayCard = ({ dayData, onDelete }) => {
 
       {isOpen && (
         <div className="day-content">
-          {/* Backendből jövő kategóriák komponensek */}
-          {{nap}.categories?.map((cat, i) => (
+          {categories.map((cat, i) => (
             <CategoryCard
               key={i}
               category={cat}
               isEditing={isEdit}
-              // update, add és delete
             />
           ))}
 
           {isEdit && (
-            <button className="add-category-btn"> {/* backend POST */}
-              Új kategória hozzáadása 
+            <button className="add-category-btn">
+              Új kategória hozzáadása
             </button>
           )}
         </div>
