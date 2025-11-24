@@ -287,3 +287,34 @@ class Database:
         print("univerzalis_join sql: "+table_blueprint.To_Join(self.tables[kapcsolt_tabla_index], join_type, where_mezo, operator))
         if return_count: return self.fetch_one(table_blueprint.To_Join(self.tables[kapcsolt_tabla_index], join_type, where_mezo, operator, return_count), where_adat)[0]
         else: return self.fetch_all(table_blueprint.To_Join(self.tables[kapcsolt_tabla_index], join_type, where_mezo, operator, return_count), where_adat)
+
+
+    def SELECT_ai_havi_lebontas(self, user_id:str, ev:str) -> list:
+        query = """
+                    SELECT 
+                        strftime('%m', nk.datum) AS honap,
+                        SUM(k.osszeg) AS osszeg
+                    FROM napi_koltesek nk
+                    JOIN koltesi_kategoriak kk ON nk.kategoria_csoport_id = kk.kategoria_csoport_id
+                    JOIN koltesek k ON kk.koltes_id = k.koltes_id
+                    WHERE nk.user_id = ?
+                    AND strftime('%Y', nk.datum) = ?
+                    GROUP BY honap
+                    ORDER BY honap
+                """
+        return self.fetch_all(query, (user_id, ev))
+
+    def SELECT_ai_kategoria_lebontas(self, user_id:str, ev:str) -> list:
+        query = """
+                    SELECT 
+                        kn.nev AS category, 
+                        SUM(k.osszeg) AS value
+                    FROM napi_koltesek nk
+                    JOIN koltesi_kategoriak kk ON nk.kategoria_csoport_id = kk.kategoria_csoport_id
+                    JOIN koltesek k ON kk.koltes_id = k.koltes_id
+                    JOIN kategoria_nevek kn ON kk.kategoria_nev_id = kn.id
+                    WHERE nk.user_id = ?
+                    AND strftime('%Y', nk.datum) = ?
+                    GROUP BY kn.nev
+                """
+        return self.fetch_all(query, (user_id, ev))
