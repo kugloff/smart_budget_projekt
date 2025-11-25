@@ -158,30 +158,26 @@ def create_app():
         if request.method == "GET": return serve_react_page('expenses')
         return get_error_json("Invalid method!")
 
-    # GET - lekéri az összeset, a POST-al pedig csak egy adott napot, ekkor igényel egy datum paramétert.
-    @app.route("/api/get_napi_koltesek", methods=["GET", "POST"])
+    # GET - lekéri az összeset, ha kap egy paramétert akkor csak azt az egy napot kéri le. PL: GET /api/napi_koltesek?datum=2025-01-01
+    @app.route("/api/get_napi_koltesek", methods=["GET"])
     def get_napi_koltesek():
         if (x := is_logged()) != True: return x  # login ellenőrzés
+        datum = request.args.get("datum")
         eredmeny = {}
-        if request.method == "GET":
-            napok = db.select_napi_koltesek(0, session['user_id'])
-            for i in napok:
-                datum = i[2]
-                eredmeny[datum] = get_nap_kategoriak(i[1])
-            return jsonify(eredmeny)
-        if request.method == "POST":
-            data = request.get_json(silent=True)
-            if not data:
-                return get_error_json("Hiányzó JSON!")
-            if "datum" not in data:
-                return get_error_json("A 'datum' mező nem létezik!")
 
-            napok = db.select_napi_koltesek((0, 2), (session['user_id'], data["datum"]))
-            for i in napok:
-                datum = i[2]
-                eredmeny[datum] = get_nap_kategoriak(i[1])
-            return jsonify(eredmeny)
-        return get_error_json("Invalid method!")
+        if datum is None:
+            napok = db.select_napi_koltesek(0, session['user_id'])
+        else:
+            napok = db.select_napi_koltesek((0, 2), (session['user_id'], datum))
+            if not napok: # != []
+                return get_error_json("A kért nap nem található")
+
+        for i in napok:
+            datum = i[2]
+            eredmeny[datum] = get_nap_kategoriak(i[1])
+
+        return jsonify(eredmeny)
+
 
     # visszaadja azt az egy költési kategóriához tartozó költéseket melyet a paraméterek pontosan meghatároznak. kötelező paraméterek: datum, kategoria_nev
     # visszaad: {"koltesek": [...]} formában (ugyan úgy mint az összes nap lekérésénél)
@@ -270,6 +266,28 @@ def create_app():
             return jsonify({"error": False, "info": "Sikeres hozzáadás!"})
         else:
             return get_error_json("A kért költés nem hozzáadható!")
+
+    # visszaadja az összes a felhasználóhoz tartozó költési kategória nevet, minden adattal együtt.PL: [(1, 'Utazás', 'FFAA33', 'VVZDMQ'), ...]
+    @app.route("/api/get_kategoria_nevek", methods=["GET"])
+    def get_kategoria_nevek():
+        if not (x := is_logged()): return x
+        return jsonify(db.select_kategoria_nevek(3, session['user_id']))
+    @app.route("/api/add_kategoria_nev", methods=["POST"])
+    def get_kategoria_nevek():
+        if not (x := is_logged()): return x
+        data = request.get_json(silent=True)
+        if not data:
+            return get_error_json("Hiányzó JSON!")
+        if "nev" not in data or "szin_kod" not in data:
+            return get_error_json("Hiányzó mezők!, (id)")
+        id = data["id"]
+        
+    @app.route("/api/edit_kategoria_nev", methods=["PUT"])
+    def get_kategoria_nevek():
+        if not (x := is_logged()): return x
+    @app.route("/api/delete_kategoria_nev", methods=["DELETE"])
+    def get_kategoria_nevek():
+        if not (x := is_logged()): return x
 
     # analysis
     @app.route('/analysis')

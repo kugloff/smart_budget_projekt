@@ -271,7 +271,7 @@ class Database:
         if return_count: return self.fetch_one(table_blueprint.ToSimpleSELECT(where_mezo, operator, return_count), where_adat)[0]
         else: return self.fetch_all(table_blueprint.ToSimpleSELECT(where_mezo, operator, return_count), where_adat)
 
-
+    # TODO megcsinálni hogy képesek legyen a selectek visszaadni az összes mezőn kívül csak megadottakat is.
     def select_felhasznalo(self, where_mezo:tuple[int, ...]|int, where_adat:tuple|object, operator:LogikaiOperatorok=LogikaiOperatorok.AND, return_count:bool=False) -> list|int:
         if isinstance(where_mezo, int): where_mezo, where_adat = (where_mezo,), (where_adat,)
         return self.egyszeru_select("felhasznalok",where_mezo, where_adat, operator, return_count)

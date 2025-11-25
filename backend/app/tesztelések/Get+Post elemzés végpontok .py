@@ -129,8 +129,8 @@ print("-"*50)
 #er2 = db.univerzalis_join("felhasznalok", "napi_koltesek", JoinTypes.LEFT, (0, 4, 6), ("VVZDMQ", "IDK ki", "2025"), return_count=True)
 #er2 = db.univerzalis_join("napi_koltesek", "koltesi_kategoriak", JoinTypes.INNER, (2,5), ("2025-11-9", 4))
 #er2 = db.select_napi_koltesek((0, 2), (USER, "2025-11-9"))
-er2 = db.add_koltesi_kategoria(1, 2)
-
+#er2 = db.add_koltesi_kategoria(1, 2)
+er2 = db.select_kategoria_nevek(3, USER)
 
 
 print(er2)
