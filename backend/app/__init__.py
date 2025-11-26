@@ -270,10 +270,12 @@ def create_app():
     # visszaadja az összes a felhasználóhoz tartozó költési kategória nevet, minden adattal együtt.PL: [(1, 'Utazás', 'FFAA33', 'VVZDMQ'), ...]
     @app.route("/api/get_kategoria_nevek", methods=["GET"])
     def get_kategoria_nevek():
+        # Ez a GET hívás megmarad az eredeti neven.
         if not (x := is_logged()): return x
         return jsonify(db.select_kategoria_nevek(3, session['user_id']))
+
     @app.route("/api/add_kategoria_nev", methods=["POST"])
-    def get_kategoria_nevek():
+    def add_kategoria_nev(): # A nevet 'add_kategoria_nev'-re cseréltük
         if not (x := is_logged()): return x
         data = request.get_json(silent=True)
         if not data:
@@ -283,12 +285,12 @@ def create_app():
         id = data["id"]
         
     @app.route("/api/edit_kategoria_nev", methods=["PUT"])
-    def get_kategoria_nevek():
-        if not (x := is_logged()): return x
-    @app.route("/api/delete_kategoria_nev", methods=["DELETE"])
-    def get_kategoria_nevek():
+    def edit_kategoria_nev(): # A nevet 'edit_kategoria_nev'-re cseréltük
         if not (x := is_logged()): return x
 
+    @app.route("/api/delete_kategoria_nev", methods=["DELETE"])
+    def delete_kategoria_nev(): # A nevet 'delete_kategoria_nev'-re cseréltük
+        if not (x := is_logged()): return x
     # analysis
     @app.route('/analysis')
     def analysis():
