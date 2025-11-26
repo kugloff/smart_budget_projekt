@@ -4,17 +4,14 @@ import { Trash2 } from "lucide-react";
 import "./DayCard.css";
 
 export const CategoryCard = ({ category, isEditing }) => {
-  // backend - kategória adatai (kódban figyelni kell: category. előfordulásokra)
-
-  // ez itt vvvv összeadja az entry-k összegét, át kell írni
-  const categoryTotal = category.entries.reduce(
-    (sum, entry) => sum + Number(entry.amount), 
+    const categoryTotal = (category.entries || []).reduce(
+    (sum, entry) => sum + Number(entry.amount ?? entry.osszeg ?? 0), 
     0
   ) || 0;
 
-  // backend 	- kategória színek lekérdezése -> ahol category.color van át kell írni
+  const availableCategories = ["Élelmiszer", "Rezsi", "Szórakozás", "Utazás"]; 
 
-  // 			- update/delete/add entry
+  const categoryColor = category.color || category.kategoria_szin || "#999999"; 
 
   return (
     <div className="category-card">
