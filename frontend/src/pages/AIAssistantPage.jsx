@@ -78,7 +78,7 @@ export default function AIAssistantPage() {
               ? <ReactMarkdown>{response}</ReactMarkdown> 
               : (!userData 
                   ? "Felhasználói adatok betöltése..." 
-                  : "AI válasza itt fog megjelenni...")}
+                  : "Válassz a lehetőségek közül. Az AI válasza itt fog megjelenni...")}
           </div>
         </div>
       </div>
