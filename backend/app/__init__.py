@@ -140,12 +140,12 @@ def create_app():
             if foglalt_email:
                 return jsonify({"success": False, "message": "A megadott email már foglalt!"}), 401
 
-            db.add_felhasznalo(name, email, generate_password_hash(jelszo))
-            # --- Sikeres bejelentkezés ---
+           # Felhasználó hozzáadása után le kell kérnünk az új ID-t
+            uj_felhasznalo_id = db.add_felhasznalo(name, email, generate_password_hash(jelszo))
             session.clear()
-            session['user_id'] = name
+            # Itt ne a 'name'-et, hanem az ID-t mentsük el!
+            session['user_id'] = uj_felhasznalo_id 
             session['user_email'] = email
-
             return jsonify({"success": True, "message": "Sikeres regisztráció!"}), 200
 
         except Exception:
@@ -275,14 +275,26 @@ def create_app():
         return jsonify(db.select_kategoria_nevek(3, session['user_id']))
 
     @app.route("/api/add_kategoria_nev", methods=["POST"])
-    def add_kategoria_nev(): # A nevet 'add_kategoria_nev'-re cseréltük
+    def add_kategoria_nev():
         if not (x := is_logged()): return x
         data = request.get_json(silent=True)
         if not data:
             return get_error_json("Hiányzó JSON!")
+        
+    # Új kategória hozzáadásához csak a 'nev' és 'szin_kod' mezők kellenek.
         if "nev" not in data or "szin_kod" not in data:
-            return get_error_json("Hiányzó mezők!, (id)")
-        id = data["id"]
+            # Pontosabb hibaüzenet, ha a 'nev' vagy a 'szin_kod' hiányzik
+            return get_error_json("Hiányzó mezők: nev és szin_kod szükséges!")
+
+        nev = data["nev"]
+        szin_kod = data["szin_kod"]
+        try:
+            # db.add_category(nev, szin_kod, user_id)
+            return jsonify({"success": True}), 200
+        except Exception as e:
+            # Adatbázis/egyéb hiba esetén
+            print(f"Hiba kategória hozzáadásakor: {e}")
+            return get_error_json("Szerveroldali hiba a kategória mentésekor.")
         
     @app.route("/api/edit_kategoria_nev", methods=["PUT"])
     def edit_kategoria_nev(): # A nevet 'edit_kategoria_nev'-re cseréltük
