@@ -80,6 +80,7 @@
             <DayCard
               key={day.id}
               dayData={day}
+              onRefresh={loadDays}
               onDelete={() => handleDelete(day.id)}
             />
           ))}

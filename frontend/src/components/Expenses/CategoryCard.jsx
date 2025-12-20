@@ -4,22 +4,19 @@ import { Trash2, Plus } from "lucide-react";
 import "./DayCard.css";
 
 export const CategoryCard = ({ category, isEditing, datum, onRefresh }) => {
-  const [availableTypes, setAvailableTypes] = useState([]); // A választható kategória nevek (pl. Élelmiszer, Rezsi)
+  const [availableTypes, setAvailableTypes] = useState([]); 
 
-  // 1. Kategória nevek lekérése a backendről (GET /api/get_kategoria_nevek)
   useEffect(() => {
     if (isEditing && !category.name) {
       fetch("/api/get_kategoria_nevek")
         .then((res) => res.json())
         .then((data) => {
-          // A backend [(id, nev, szin, uid), ...] formátumot ad vissza
           setAvailableTypes(data);
         })
         .catch((err) => console.error("Hiba a kategóriák betöltésekor:", err));
     }
   }, [isEditing, category.name]);
 
-  // 2. Kategória hozzárendelése a naphoz (POST /api/add_koltesi_kategoria)
   const handleSelectCategory = async (kategoria_id) => {
     try {
       const response = await fetch("/api/add_koltesi_kategoria", {
@@ -27,13 +24,13 @@ export const CategoryCard = ({ category, isEditing, datum, onRefresh }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           datum: datum,
-          kategoria_id: kategoria_id, // Fontos: a backend kategoria_id-t vár!
+          kategoria_id: kategoria_id, 
         }),
       });
 
       const result = await response.json();
       if (!result.error) {
-        onRefresh(); // Frissítjük a szülőt, hogy eltűnjön a "választó" mód
+        onRefresh();
       } else {
         alert(result.info);
       }
