@@ -226,24 +226,30 @@ def create_app():
     # hozzáad egy új "üres" kölotési kategóriát egy adott naphoz, paraméterek: datum, kategoria_nev_id
     @app.route("/api/add_koltesi_kategoria", methods=["POST"])
     def add_koltesi_kategoria():
-        if (x := is_logged()) != True: return x  # login ellenőrzés
+        if (x := is_logged()) != True: return x
+    
         data = request.get_json(silent=True)
-        if not data:
-            return get_error_json("Hiányzó JSON!")
-        if "datum" not in data or "kategoria_id" not in data:
+        if not data or "datum" not in data or "kategoria_id" not in data:
             return get_error_json("Hiányzó mezők!")
-        datum = data["datum"]
-        kategoria_nev_id = data["kategoria_nev_id"]
 
-        er = db.select_napi_koltesek((0, 2), (session['user_id'], datum))
-        if len(er) != 1:
+        datum = data["datum"]
+        kategoria_id = data["kategoria_id"] 
+
+        napok = db.select_napi_koltesek((0, 2), (session['user_id'], datum))
+        
+        if not napok:
             return get_error_json("A megadott napi költés nem létezik!")
-        er2 = db.add_koltesi_kategoria(er[1], kategoria_nev_id)
-        if not er2:
-            return get_error_json("A kért költési kategória nem hozzáadható!")
-        elif er2.startswith("UNIQUE"):
-            return get_error_json("Minden naphoz csak egyszer szerepelhet ugyanaz a kategória!")
-        return jsonify({"error": False, "info": "Sikeres hozzáadás!"})
+
+        napi_id = napok[0][1] 
+        
+        er2 = db.add_koltesi_kategoria(napi_id, kategoria_id)
+        
+        if er2 == True:
+            return jsonify({"error": False, "info": "Sikeres hozzáadás!"})
+        elif isinstance(er2, str) and er2.startswith("UNIQUE"):
+            return get_error_json("Ez a kategória már hozzá van adva ehhez a naphoz!")
+        
+        return get_error_json("Váratlan hiba történt a mentéskor.")
 
     # hozzáad egy új költést egy kölotési kategóriához, paraméterek: koltes_id, osszeg, leiras=None
     @app.route("/api/add_koltes", methods=["POST"])
