@@ -3,6 +3,7 @@ import "./AddDayModal.css";
 
 export const AddDayModal = ({ isOpen, onClose, onSave }) => {
   const [date, setDate] = useState("");
+  const [loading, setLoading] = useState(false); // Visszajelzés a mentésről
 
   useEffect(() => {
     if (isOpen) {
@@ -12,11 +13,36 @@ export const AddDayModal = ({ isOpen, onClose, onSave }) => {
     }
   }, [isOpen]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!date) return;
 
-    onSave({ date });
-    onClose();
+    setLoading(true);
+    try {
+      // BACKEND ÖSSZEKÖTÉS
+      const response = await fetch("/api/add_napi_koltes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ datum: date }), // A backend 'datum' kulcsot vár
+      });
+
+      const result = await response.json();
+
+      if (result.error === false) {
+        // Ha a backend sikeresen válaszolt
+        onSave(); // Ez frissíti az Expense oldalon a listát
+        onClose();
+      } else {
+        // Ha hiba történt (pl. már létezik ez a nap)
+        alert(result.info);
+      }
+    } catch (error) {
+      console.error("Hiba a mentés során:", error);
+      alert("Hálózati hiba történt!");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -32,15 +58,27 @@ export const AddDayModal = ({ isOpen, onClose, onSave }) => {
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
+            disabled={loading}
           />
         </div>
 
         <div className="modal-buttons">
-          <button className="close-button" onClick={onClose}>Mégse</button>
-          <button className="save-button" onClick={handleSave}>Mentés</button>
+          <button 
+            className="close-button" 
+            onClick={onClose} 
+            disabled={loading}
+          >
+            Mégse
+          </button>
+          <button 
+            className="save-button" 
+            onClick={handleSave} 
+            disabled={loading}
+          >
+            {loading ? "Mentés..." : "Mentés"}
+          </button>
         </div>
       </div>
     </div>
   );
 };
-

@@ -1,52 +1,68 @@
-import React, { useState } from "react";
-import { ChevronDown, ChevronUp, Trash2, Edit3, Save, X } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { ChevronDown, ChevronUp, Trash2, Edit3, Save, X, Plus } from "lucide-react";
 import { CategoryCard } from "./CategoryCard";
 import "./DayCard.css";
 
-export const DayCard = ({ dayData, onDelete }) => {
+export const DayCard = ({ dayData, onDelete, onRefresh }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
+  const [localCategories, setLocalCategories] = useState([]);
 
-  // A backendből jövő adatok:
   const date = dayData.date || dayData.datum;
-  const categories = Array.isArray(dayData.categories)
-    ? dayData.categories
-    : [];
 
-  // Napi összeg
-  const dayTotal = categories.reduce(
-    (sum, c) => sum + (c.amount ?? c.osszeg ?? 0),
-    0
-  );
+  // Adatok szinkronizálása a szülővel
+  useEffect(() => {
+    if (dayData && dayData.categories) {
+      setLocalCategories(dayData.categories);
+    }
+  }, [dayData]);
+
+  // --- EZ HIÁNYZOTT: A kinyitás/becsukás kezelője ---
+  const handleToggleOpen = () => {
+    setIsOpen((prev) => {
+      // Ha becsukjuk, lépjünk ki a szerkesztési módból is
+      if (prev) setIsEdit(false);
+      return !prev;
+    });
+  };
 
   const handleEditClick = () => {
     if (!isOpen) setIsOpen(true);
     setIsEdit(true);
   };
 
-  const handleToggleOpen = () => {
-    setIsOpen((prev) => {
-      if (prev) setIsEdit(false);
-      return !prev;
-    });
+  const handleAddEmptyCategory = () => {
+    const newEmpty = { 
+        name: "", 
+        entries: [], 
+        color: "#999999",
+        amount: 0 
+    };
+    setLocalCategories([...localCategories, newEmpty]);
   };
 
-  const handleSave = () => setIsEdit(false);
-  const handleCancel = () => setIsEdit(false);
+  const handleSave = () => {
+    setIsEdit(false);
+    if (onRefresh) onRefresh();
+  };
+
+  const handleCancel = () => {
+    setIsEdit(false);
+    setLocalCategories(dayData.categories || []);
+  };
 
   return (
     <div className="day-card">
       <div className="day-header">
         <div className="day-info">
-          <strong>{date.replace(/-/g, ".") + "."}</strong>
-
+          <strong>{date?.replace(/-/g, ".") + "."}</strong>
           {!isOpen && (
             <div className="day-category-dots">
-              {categories.map((cat, i) => (
+              {localCategories.map((cat, i) => (
                 <span
                   key={i}
                   className="small-dot"
-                  style={{ backgroundColor: cat.color || cat.kategoria_szin || "#999" }}
+                  style={{ backgroundColor: cat.color || cat.szin_kod || "#999" }}
                 />
               ))}
             </div>
@@ -54,27 +70,19 @@ export const DayCard = ({ dayData, onDelete }) => {
         </div>
 
         <div className="day-actions-total">
-          <div className="day-total">{dayTotal.toLocaleString()} Ft</div>
+          <div className="day-total">
+            {localCategories.reduce((s, c) => s + (c.amount || c.osszeg || 0), 0).toLocaleString()} Ft
+          </div>
 
-          {!isEdit && (
+          {!isEdit ? (
             <>
-              <button onClick={handleEditClick}>
-                <Edit3 size={20} />
-              </button>
-              <button onClick={onDelete}>
-                <Trash2 size={20} />
-              </button>
+              <button onClick={handleEditClick}><Edit3 size={20} /></button>
+              <button onClick={onDelete}><Trash2 size={20} /></button>
             </>
-          )}
-
-          {isEdit && (
+          ) : (
             <>
-              <button onClick={handleSave}>
-                <Save size={20} />
-              </button>
-              <button onClick={handleCancel}>
-                <X size={20} />
-              </button>
+              <button onClick={handleSave}><Save size={20} /></button>
+              <button onClick={handleCancel}><X size={20} /></button>
             </>
           )}
 
@@ -86,17 +94,22 @@ export const DayCard = ({ dayData, onDelete }) => {
 
       {isOpen && (
         <div className="day-content">
-          {categories.map((cat, i) => (
+          {localCategories.map((cat, i) => (
             <CategoryCard
-              key={i}
+              key={cat.id || i}
               category={cat}
               isEditing={isEdit}
+              datum={date}
+              onRefresh={onRefresh}
             />
           ))}
 
           {isEdit && (
-            <button className="add-category-btn">
-              Új kategória hozzáadása
+            <button 
+              className="add-category-btn" 
+              onClick={handleAddEmptyCategory}
+            >
+              <Plus size={16} /> Új kategória hozzáadása
             </button>
           )}
         </div>
