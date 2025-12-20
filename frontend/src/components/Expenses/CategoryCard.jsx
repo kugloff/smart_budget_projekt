@@ -1,54 +1,105 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { EntryItem } from "./EntryItem";
-import { Trash2 } from "lucide-react";
+import { Trash2, Plus } from "lucide-react";
 import "./DayCard.css";
 
-export const CategoryCard = ({ category, isEditing }) => {
-    const categoryTotal = (category.entries || []).reduce(
-    (sum, entry) => sum + Number(entry.amount ?? entry.osszeg ?? 0), 
+export const CategoryCard = ({ category, isEditing, datum, onRefresh }) => {
+  const [availableTypes, setAvailableTypes] = useState([]); // A választható kategória nevek (pl. Élelmiszer, Rezsi)
+
+  // 1. Kategória nevek lekérése a backendről (GET /api/get_kategoria_nevek)
+  useEffect(() => {
+    if (isEditing && !category.name) {
+      fetch("/api/get_kategoria_nevek")
+        .then((res) => res.json())
+        .then((data) => {
+          // A backend [(id, nev, szin, uid), ...] formátumot ad vissza
+          setAvailableTypes(data);
+        })
+        .catch((err) => console.error("Hiba a kategóriák betöltésekor:", err));
+    }
+  }, [isEditing, category.name]);
+
+  // 2. Kategória hozzárendelése a naphoz (POST /api/add_koltesi_kategoria)
+  const handleSelectCategory = async (kategoria_id) => {
+    try {
+      const response = await fetch("/api/add_koltesi_kategoria", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          datum: datum,
+          kategoria_id: kategoria_id, // Fontos: a backend kategoria_id-t vár!
+        }),
+      });
+
+      const result = await response.json();
+      if (!result.error) {
+        onRefresh(); // Frissítjük a szülőt, hogy eltűnjön a "választó" mód
+      } else {
+        alert(result.info);
+      }
+    } catch (err) {
+      console.error("Hiba a mentésnél:", err);
+    }
+  };
+
+  const categoryTotal = (category.entries || []).reduce(
+    (sum, entry) => sum + Number(entry.osszeg ?? 0),
     0
-  ) || 0;
+  );
 
-  const availableCategories = ["Élelmiszer", "Rezsi", "Szórakozás", "Utazás"]; 
-
-  const categoryColor = category.color || category.kategoria_szin || "#999999"; 
+  // Szín meghatározása (backend: szin_kod vagy color)
+  const categoryColor = category.szin_kod || category.color || "#999999";
 
   return (
     <div className="category-card">
       <div className="category-header">
         <div className="category-left">
-          <span className="color-dot" style={{backgroundColor:category.color}}></span>
-          {isEditing ? (
-            <select value={category.name} className="category-select" disabled>
-              <option value="">Válassz kategóriát</option>
-              {availableCategories.map((cat, i) => <option key={i} value={cat}>{cat}</option>)}
-			  {/* availableCategories itt majd a sima category lesz */}
+          <span
+            className="color-dot"
+            style={{ backgroundColor: categoryColor }}
+          ></span>
+
+          {isEditing && !category.name ? (
+            <select
+              className="category-select"
+              onChange={(e) => handleSelectCategory(e.target.value)}
+              defaultValue=""
+            >
+              <option value="" disabled>Kategória kiválasztása...</option>
+              {availableTypes.map((type) => (
+                <option key={type[0]} value={type[0]}>
+                  {type[1]}
+                </option>
+              ))}
             </select>
           ) : (
-            <span className="category-name">{category.name}</span>
+            <span className="category-name">{category.name || "Új kategória"}</span>
           )}
         </div>
-        <div style={{display:"flex", alignItems:"center", gap:"8px"}}>
-          <span className="category-total">{categoryTotal.toLocaleString()} Ft</span>
-          {isEditing && (
-            <button className="delete-entry-btn" disabled>
-              <Trash2 size={16}/>
+
+        <div className="category-right" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <span className="category-total">
+            {categoryTotal.toLocaleString()} Ft
+          </span>
+          {isEditing && category.name && (
+            <button className="delete-entry-btn">
+              <Trash2 size={16} />
             </button>
           )}
         </div>
       </div>
 
       <div className="category-entries">
-        {category?.entries?.map((entry, i) => (
-          <EntryItem 
-            key={i} 
-            entry={entry} 
-            isEditing={isEditing} 
-            // backend entry változtatás és delete
-          />
-        ))}
-        {isEditing && (
-          <button className="add-entry-btn" disabled>Új tétel hozzáadása</button>
+        {/* Csak akkor mutatjuk a tételeket, ha már el van mentve a kategória */}
+        {category.entries &&
+          category.entries.map((entry, i) => (
+            <EntryItem key={i} entry={entry} isEditing={isEditing} />
+          ))}
+
+        {isEditing && category.name && (
+          <button className="add-entry-btn">
+            <Plus size={14} /> Új tétel
+          </button>
         )}
       </div>
     </div>

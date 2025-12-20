@@ -1,100 +1,260 @@
 .modal-overlay{
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	background-color: rgba(30, 58, 138, 0.6);
-	z-index: 100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(30, 58, 138, 0.6);
+    z-index: 1000; /* Magasabb z-index a biztonság kedvéért */
 }
 
 .modal-content{
-	background: white;
-	padding: 20px;
-	border-radius: 16px;
-	width: 500px;
-	max-height: 80vh;
-	overflow-y: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Kicsit konzisztensebb gap */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    font-family: 'Inter', sans-serif;
 }
 
 .modal-title{
-	margin-bottom: 15px;
-	font-size: 22px;
-	font-weight: 600;
+    margin-bottom: 15px;
+    font-size: 22px;
+    font-weight: 600;
+    color: #1e3a8a; /* Kék címsor */
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
 }
+
+/* -------------------------------------- */
+/* --- Kategória Lista Stílusok --- */
+/* -------------------------------------- */
 
 .category-list{
-	display: flex;
-	flex-direction: column;
-	gap: 10px;
-	margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
-.category-row,
+.category-row{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    background-color: #f4f7fc; /* Világos kék háttér */
+    border-radius: 8px;
+}
+
 .add-category{
-	display: flex;
-	align-items: center;
-	gap: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    border: 1px dashed #ccc;
+    border-radius: 8px;
 }
 
+/* INPUTS */
+
+.category-name-input,
+.new-category-input,
 .category-row input[type="text"],
 .add-category input[type="text"]{
-	flex: 1;
-	padding: 6px 8px;
-	border-radius: 8px;
-	border: 1px solid #ccc;
+    flex: 1;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
 }
 
 .category-row input[type="color"],
-.add-category input[type="color"]{
-	width: 32px;
-	height: 32px;
-	border: none;
-	cursor: pointer;
+.add-category input[type="color"],
+.color-picker-small,
+.color-picker-large{
+    width: 32px;
+    height: 32px;
+    border: none;
+    padding: 0;
+    border-radius: 6px;
+    cursor: pointer;
+    background: none;
+    border: 1px solid #ccc;
 }
+
+/* -------------------------------------- */
+/* --- Gombok és Címkék --- */
+/* -------------------------------------- */
 
 .delete-btn,
 .add-btn{
-	background: #1e3a8a;
-	color: white;
-	border: none;
-	border-radius: 8px;
-	padding: 5px 10px;
-	cursor: pointer;
+    background: #1e3a8a;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
+
+.delete-btn {
+    background: #c0392b; /* Piros a törléshez */
+}
+
+.add-btn:hover:not(:disabled) {
+    background-color: #152c67;
+}
+
+.delete-btn:hover {
+    background-color: #a02c21;
+}
+
+.add-btn:disabled {
+    background-color: #7986cb;
+    cursor: not-allowed;
+}
+
 
 .add-category-label{
     text-align: left;
-	font-weight: 600;
-	font-size: 16px;
-	color: #1E3A8A;
-	margin: 10px 0 5px 0;
-	padding-bottom: 4px;
+    font-weight: 600;
+    font-size: 16px;
+    color: #1E3A8A;
+    margin: 10px 0 5px 0;
+    padding-bottom: 4px;
 }
 
 .category-modal-buttons{
-	display: flex;
-	justify-content: center;
-	margin-top: 15px;
+    display: flex;
+    justify-content: flex-end; /* Bezárás jobbra */
+    margin-top: 15px;
 }
 
 .category-close-btn{
-	background-color: white;
-	color: #1E3A8A;
-	border: 1px solid #1E3A8A;
-	border-radius: 18px;
-	padding: 12px 20px;
-	cursor: pointer;
-	font-size: 16px;
-	font-weight: 300;
-	width: 50%;
-	text-align: center;
-	transition: background-color 0.2s ease;
+    background-color: white;
+    color: #1E3A8A;
+    border: 1px solid #1E3A8A;
+    border-radius: 8px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.2s ease;
 }
+
+.category-close-btn:hover {
+    background-color: #1e3a8a;
+    color: white;
+}
+
+
+/* -------------------------------------- */
+/* --- Státusz és Töltés (HOZZÁADVA a funkcionalitáshoz) --- */
+/* -------------------------------------- */
+
+.status-message {
+    padding: 12px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    position: relative;
+    margin-bottom: 10px;
+}
+
+.status-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.status-close-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: inherit;
+    font-weight: bold;
+    cursor: pointer;
+    opacity: 0.7;
+}
+
+.loading-spinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #1e3a8a; /* Theme blue */
+    font-weight: 600;
+}
+
+/* -------------------------------------- */
+/* --- Megerősítő Modal (ConfirmModal) (HOZZÁADVA) --- */
+/* -------------------------------------- */
 
 .confirm-message{
     margin-bottom: 15px;
+    font-size: 1.1rem;
+    text-align: center;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: space-around;
+    gap: 10px;
+}
+
+.close-button {
+    background-color: #f0f0f0; /* Világosabb háttér a Mégse gombnak */
+    color: #1e3a8a;
+    padding: 10px 20px;
+    border: 1px solid #1e3a8a;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+    flex-grow: 1;
+}
+
+.close-button:hover {
+    background-color: #e0e0e0;
+}
+
+.delete-button {
+    background-color: #e74c3c; /* Piros megerősítés */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+    flex-grow: 1;
+}
+
+.delete-button:hover {
+    background-color: #c0392b;
 }
