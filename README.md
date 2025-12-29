@@ -1,20 +1,20 @@
-# SmartBudget – AI-alapú személyes pénzügyi tanácsadó
+# SmartBudget Projekt
 
-A **SmartBudget** egy modern, webalapú pénzügyi alkalmazás, amely segít átláthatóan kezelni és elemezni a kiadásokat.  
-A felhasználók egy letisztult, React-alapú felületen adhatják meg a napi költségeiket, melyeket a **Flask backend** tárol és dolgoz fel.
+A **SmartBudget** egy egyszerű, letisztult és hatékony webes alkalmazás, amely segít a mindennapi pénzügyek kezelésében. Az alkalmazás segítségével könnyedén rögzítheted a kiadásaidat, így valós időben láthatod az aktuális egyenlegedet. Az átláthatóság érdekében létrehozhatsz különböző kategóriákat színkódolással, valamint havi limitet is beállíthatsz a kiadásaidhoz.
 
-Az alkalmazás **mesterséges intelligenciát (OpenAI API)** is használ, amely elemezi a költési mintákat és személyre szabott pénzügyi tanácsokat ad.
+## Funkciók
+- Tranzakciók rögzítése: Adj hozzá bevételeket vagy kiadásokat egy rövid leírással, az összeg megadásával és kategória kiválasztásával.
+- Dinamikus egyenlegszámítás: Az alkalmazás automatikusan kiszámítja a teljes egyenleget, valamint a kategóriánkénti költéseket.
+- Költési előzmények: Átlátható lista a korábbi tételekről.
+- Tételek törlése: Bármikor eltávolíthatod a hibásan felvitt vagy már nem aktuális tranzakciókat.
+- Költések elemzése: Diagramok éves megjelenítéssel (havi és kategória szerinti lebontással)
+- AI integráció: Kérj tanácsot a felvitt kiadásaidról, költési szokásaidról
 
-## Fő funkciók
-- Kiadások rögzítése, kategorizálása (pl. étel, közlekedés, rezsi)
-- Interaktív statisztikák és diagramok (pl. havi költési bontás)
-- AI-alapú pénzügyi elemzések és javaslatok
-- Reszponzív, modern felhasználói felület (React)
-- Python Flask REST API backend + SQLite adatbázis
+Az alkalmazás **mesterséges intelligenciát (Google Gemini API)** is használ, amely elemezi a költési mintákat és személyre szabott pénzügyi tanácsokat ad.
 
 ## Technológiák
 - **Frontend:** React, HTML5, CSS3, JavaScript
 - **Backend:** Python, Flask
 - **Adatbázis:** SQLite
-- **AI integráció:** OpenAI API (ChatGPT vagy GPT modellek)
+- **AI integráció:** Google Gemini API
 - **Adatkommunikáció:** REST API (JSON)

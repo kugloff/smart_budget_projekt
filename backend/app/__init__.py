@@ -319,7 +319,8 @@ def create_app():
     @app.route("/api/analysis/monthly/<int:year>", methods=["GET"])
     def analysis_monthly(year):
         if (x := is_logged()) != True: return x
-
+        adatok = db.SELECT_ai_havi_lebontas(session['user_id'], str(year))
+        print(f"DEBUG ADATOK: {adatok}")
         return jsonify([{"honap": r[0], "osszeg": r[1]} for r in db.SELECT_ai_havi_lebontas(session['user_id'], str(year))])
 
     @app.route("/api/analysis/category/<int:year>", methods=["GET"])
@@ -336,6 +337,10 @@ def create_app():
 
     @app.route("/api/ai-analysis", methods=["POST"])
     def ai_analysis():
+        # teszt, ha nem érhető el a modell
+        #for m in client.models.list():
+        #    print(f"Elérhető modell: {m.name}")
+
         if (x := is_logged()) != True:
             return x
 
@@ -343,44 +348,46 @@ def create_app():
         if not data or "mode" not in data or "userData" not in data:
             return jsonify({"error": True, "info": "Hiányzó adatok!"})
 
-        mode = data["mode"]  # "all" vagy "year"
+        mode = data["mode"]
         user_data = data["userData"]
 
         prompt = f"""
-            Te egy pénzügyi asszisztens vagy, aki a felhasználót tájékoztatja a pénzügyi helyzetéről.
-            Kérlek elemezd a felhasználó pénzügyi adatait a következő módban: {mode}.
-            Az adatok: {user_data}
-
+            Szerep: Barátságos pénzügyi tanácsadó.
+            Feladat: Elemezd a felhasználó adatait ({mode} mód): {user_data}
+            
             Szabályok:
-            1. Fogadd el a felhasználó adatait tényként, ne kérdőjelezz meg semmit.
-            2. Adj részletes, könnyen érthető pénzügyi elemzést és tanácsot.
-            3. Minden összeget forintban (Ft) jeleníts meg.
-            4. Használj Markdown-t, hogy a szöveg olvasható legyen.
-            5. Táblázatokat ne használj; a bontás legyen felsorolás vagy egyszerű lista formátumban.
-            6. Írd a választ úgy, mintha a felhasználóval beszélgetnél, barátságosan és közérthetően.
-            7. A felhasználó nem tud válaszolni a válaszodra, ezért ne kezdeményezz további beszélgetést.
-
-            Az elemzés tartalmazza:
-            - Összegzést és kategóriánkénti bontást
-            - Napi és összesített kiadásokat
-            - Legnagyobb egyedi kiadásokat
-            - Pénzügyi tanácsokat a költségvetés, megtakarítás és optimalizálás szempontjából
-
-            A stílus legyen közvetlen, beszélgető, és segítsen a felhasználónak megérteni a pénzügyi helyzetét.
+            - Használj magyar nyelvet és közvetlen stílust.
+            - Pénznem: Ft.
+            - Formátum: Markdown (felsorolás igen, táblázat NEM).
+            - Tartalom: Összegzés, kategória bontás, legnagyobb kiadások és 3 konkrét megtakarítási tipp.
+            - Ne kérdezz vissza a végén.
         """
 
         try:
             response = client.models.generate_content(
-                model="gemini-2.0-flash",
-                contents=[prompt]
+                model="models/gemini-2.5-flash",
+                contents=prompt
             )
 
-            result_text = "".join([part.text for part in response.candidates[0].content.parts])
+            if not response.text:
+                return jsonify({"error": True, "info": "Az AI válasza üres volt."})
 
-            return jsonify({"result": result_text})
+            return jsonify({"result": response.text})
 
         except Exception as e:
-            return jsonify({"error": True, "info": f"AI hívás sikertelen: {str(e)}"})
+            error_msg = str(e)
+            # Specifikus hibakezelés a kvótára
+            if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg:
+                return jsonify({
+                    "error": True, 
+                    "info": "Az ingyenes AI keret pillanatnyilag betelt. Kérlek, próbáld újra 1 perc múlva!"
+                }), 429
+            
+            # 404 esetén jelezzük a modellhibát
+            if "404" in error_msg:
+                return jsonify({"error": True, "info": "A kiválasztott AI modell nem elérhető. Próbáld később!"}), 404
+
+            return jsonify({"error": True, "info": f"AI hívás sikertelen: {error_msg}"})
 
     # statikus fájlok (JS, CSS)
     @app.route('/static/<path:filename>')
