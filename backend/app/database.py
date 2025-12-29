@@ -296,7 +296,7 @@ class Database:
         else: return self.fetch_all(table_blueprint.To_Join(self.tables[kapcsolt_tabla_index], join_type, where_mezo, operator, return_count), where_adat)
 
 
-    def SELECT_ai_havi_lebontas(self, user_id:str, ev:str) -> list:
+    def SELECT_elemzes_havi_lebontas(self, user_id:str, ev:str) -> list:
         query = """
                     SELECT 
                         strftime('%m', nk.datum) AS honap,
@@ -311,7 +311,7 @@ class Database:
                 """
         return self.fetch_all(query, (user_id, ev))
 
-    def SELECT_ai_kategoria_lebontas(self, user_id:str, ev:str) -> list:
+    def SELECT_elemzes_kategoria_lebontas(self, user_id:str, ev:str) -> list:
         query = """
                     SELECT 
                         kn.nev AS category, 

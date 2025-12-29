@@ -319,15 +319,15 @@ def create_app():
     @app.route("/api/analysis/monthly/<int:year>", methods=["GET"])
     def analysis_monthly(year):
         if (x := is_logged()) != True: return x
-        adatok = db.SELECT_ai_havi_lebontas(session['user_id'], str(year))
-        print(f"DEBUG ADATOK: {adatok}")
-        return jsonify([{"honap": r[0], "osszeg": r[1]} for r in db.SELECT_ai_havi_lebontas(session['user_id'], str(year))])
+        adatok = db.SELECT_elemzes_havi_lebontas(session['user_id'], str(year))
+        print(f"{year} DEBUG ADATOK: {adatok}")
+        return jsonify([{"honap": r[0], "osszeg": r[1]} for r in db.SELECT_elemzes_havi_lebontas(session['user_id'], str(year))])
 
     @app.route("/api/analysis/category/<int:year>", methods=["GET"])
     def analysis_category(year):
         if (x := is_logged()) != True: return x
 
-        return jsonify([{"category": r[0], "value": r[1]} for r in db.SELECT_ai_kategoria_lebontas(session['user_id'], str(year))])
+        return jsonify([{"category": r[0], "value": r[1]} for r in db.SELECT_elemzes_kategoria_lebontas(session['user_id'], str(year))])
 
     @app.route('/ai')
     def ai():
