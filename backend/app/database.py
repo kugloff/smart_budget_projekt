@@ -167,7 +167,7 @@ class Database:
               conn.commit()
               return True
         except sqlite3.IntegrityError as e:
-            if error_print and not return_integritas_error: print(f"A beszúranó adat megsérti a UNIQUE megkötés a táblában: {e}, query: {query} params: {params}")
+            if error_print and not return_integritas_error: print(f"A beszúranó adat megsérti valamley CONSTRANTE megkötést a táblában: {e}, query: {query} params: {params}")
             return str(e) if return_integritas_error else False
         except sqlite3.Error as e:
             if error_print and not return_integritas_error: print(f"Hiba az adatbázis művelet során: {e}, query: {query} params: {params}")
@@ -246,21 +246,21 @@ class Database:
         return self.execute(table_blueprint.ToINSERT_INTO(4), (None, koltes_id, leiras, osszeg), return_integritas_error=True)
     def edit_koltesek(self, edit_mezo:tuple[int, ...], edit_vaule:int, where_vaule:int) -> bool|None:
         table_blueprint: TableBluePrint = self.tables["koltesek"]
-        return self.execute(table_blueprint.ToUPDATE_TABLE(edit_mezo, (0, )), (edit_vaule, where_vaule), error_print=False)
+        return self.execute(table_blueprint.ToUPDATE_TABLE(edit_mezo, (0, )), (edit_vaule, where_vaule), return_integritas_error=True)
     def delete_koltesek(self, where_mezo:tuple[int, ...], where_adat:tuple):
         table_blueprint: TableBluePrint = self.tables["koltesek"]
-        return self.execute(table_blueprint.ToDELETE_FROM(where_mezo), where_adat, error_print=False)
+        return self.execute(table_blueprint.ToDELETE_FROM(where_mezo), where_adat, return_integritas_error=True)
 
     # kategoria nevek kezelése
     def add_kategoria_nev(self, nev:str, szinkod:str, tulajdonos:str) -> bool:
         table_blueprint: TableBluePrint = self.tables["kategoria_nevek"]
-        return self.execute(table_blueprint.ToINSERT_INTO(4), (None, nev, szinkod, tulajdonos), error_print=False)
+        return self.execute(table_blueprint.ToINSERT_INTO(4), (None, nev, szinkod, tulajdonos), return_integritas_error=True)
     def edit_kategoria_nev(self, edit_mezo:tuple[int, ...], edit_value:tuple, where_mezo:tuple[int, ...], where_vaule:tuple) -> bool:
         table_blueprint: TableBluePrint = self.tables["kategoria_nevek"]
-        return self.execute(table_blueprint.ToUPDATE_TABLE(edit_mezo, where_mezo), (edit_value+where_vaule), error_print=False)
+        return self.execute(table_blueprint.ToUPDATE_TABLE(edit_mezo, where_mezo), (edit_value+where_vaule), return_integritas_error=True)
     def delete_kategoria_nev(self, where_mezo:tuple[int, ...], where_adat:tuple):
         table_blueprint: TableBluePrint = self.tables["kategoria_nevek"]
-        return self.execute(table_blueprint.ToDELETE_FROM(where_mezo), where_adat, error_print=False)
+        return self.execute(table_blueprint.ToDELETE_FROM(where_mezo), where_adat, return_integritas_error=True)
 
     # különböző lekérések
     # list<tuple> -> van adat és azt kapjuk vissza

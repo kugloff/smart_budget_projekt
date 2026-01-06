@@ -77,10 +77,10 @@ export const CategoryManagerModal = ({ isOpen, onClose }) => {
             const data = await fetchWithBackoff("/api/get_kategoria_nevek");
             
             const formattedCategories = data.map(cat => ({
-                id: cat.id,
-                name: cat.nev,
-                color: cat.szin_kod,
-            }));
+				id: cat[0],
+				name: cat[1],
+				color: `#${cat[2]}`, // fontos: HEX-hez #
+			}));
 
             // FIX: Biztonságosan kezeljük a rendezést (ha a név undefined/null, üres stringként kezeli)
             formattedCategories.sort((a, b) => (a.name || "").localeCompare(b.name || ""));

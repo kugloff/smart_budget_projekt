@@ -8,6 +8,7 @@ db_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "database.db"
 db:Database = Database(db_path)
 db.build_database()
 USER = "VVZDMQ"
+session = {'user_id' : "VVZDMQ"}
 
 '''
 >> {} // nincs egyetlen napi költés sem.
@@ -83,7 +84,11 @@ def get_napi_koltesek():
         eredmeny[datum] = get_nap_kategoriak(i[1])
     return eredmeny
 
-print(get_napi_koltesek())
+#print(get_napi_koltesek())
+
+x = db.delete_kategoria_nev((0, 3), (5, USER))
+print(x)
+print(db.select_kategoria_nevek(3, USER))
 
 #print("Napi költések tábla: ", db.select_napi_koltesek(0, USER))
 #print("koltesi kategóriák tábla: ", db.fetch_all("select * from koltesi_kategoriak"))

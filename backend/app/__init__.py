@@ -30,12 +30,15 @@ def create_app():
         )
         return injected_html
 
-    def get_error_json(text: str):
-        return jsonify({"error": True, "info": text})
+    def get_error_json(text: str, code: int=400):
+        return jsonify({"error": True, "info": text}), code
+
+    def get_helyes_json(text:str="OK", code: int=200):
+        return jsonify({"error": False, "info": text}), code
 
     def is_logged():
         if 'user_id' not in session:
-            return redirect(url_for('login', msg='Nincs bejelentkezve!'))
+            return redirect(url_for('login', msg='Nincs bejelentkezve!')), 401
         return True
 
     def get_kategoria_koltesek(kategoria_id: int) -> list:
@@ -158,7 +161,7 @@ def create_app():
         if request.method == "GET": return serve_react_page('expenses')
         return get_error_json("Invalid method!")
 
-    # GET - lekéri az összeset, ha kap egy paramétert akkor csak azt az egy napot kéri le. PL: GET /api/napi_koltesek?datum=2025-01-01
+    # GET - lekéri az összeset, ha kap egy datum paramétert akkor csak azt az egy dátumot adja vissza.
     @app.route("/api/get_napi_koltesek", methods=["GET"])
     def get_napi_koltesek():
         if (x := is_logged()) != True: return x  # login ellenőrzés
@@ -170,13 +173,13 @@ def create_app():
         else:
             napok = db.select_napi_koltesek((0, 2), (session['user_id'], datum))
             if not napok: # != []
-                return get_error_json("A kért nap nem található")
+                return get_error_json("A kért nap nem található", 409)
 
         for i in napok:
             datum = i[2]
             eredmeny[datum] = get_nap_kategoriak(i[1])
 
-        return jsonify(eredmeny)
+        return jsonify(eredmeny), 200
 
 
     # visszaadja azt az egy költési kategóriához tartozó költéseket melyet a paraméterek pontosan meghatároznak. kötelező paraméterek: datum, kategoria_nev
@@ -198,13 +201,12 @@ def create_app():
         if len(adat) == 1:
             kategoria_nev_id = adat[0][0]  # [(1, 'Utazás', 'FFAA33', 'VVZDMQ')] <- ebből kinyerük az id-t
         else:
-            return get_error_json("A megadott kategória név nem létezik.")
-        koltesi_kategoria = db.univerzalis_join("napi_koltesek", "koltesi_kategoriak", JoinTypes.INNER, (2, 5),
-                                                (datum, kategoria_nev_id))
-        if len(koltesi_kategoria) != 1: return get_error_json("A kért költési kategória nem létezik!")
+            return get_error_json("A megadott kategória név nem létezik.", 409)
+        koltesi_kategoria = db.univerzalis_join("napi_koltesek", "koltesi_kategoriak", JoinTypes.INNER, (2, 5),(datum, kategoria_nev_id))
+        if len(koltesi_kategoria) != 1: return get_error_json("A kért költési kategória nem létezik!", 409)
         # a költési koltesi_kategoria adat minta: [('VVZDMQ', 1, '2025-11-9', 1, 2, 4)]
         kategoia_koltesek = get_kategoria_koltesek(koltesi_kategoria[0][4])
-        return jsonify({"koltesek": kategoia_koltesek})
+        return jsonify({"koltesek": kategoia_koltesek}), 200
 
     # hozzáad egy új "üres" napot, igényel egy datum json mezőt.
     @app.route("/api/add_napi_koltes", methods=["POST"])
@@ -218,10 +220,10 @@ def create_app():
 
         ad = db.add_napi_koltes(session['user_id'], data["datum"])
         if not ad:
-            return get_error_json("A kért nap nem hozzáadható!")
+            return get_error_json("A kért nap nem hozzáadható!", 409)
         elif ad.startswith("UNIQUE"):
-            return get_error_json("Minden dátum csak egyszer szerepelhet!")
-        return jsonify({"error": False, "info": "Sikeres hozzáadás!"})
+            return get_error_json("Minden dátum csak egyszer szerepelhet!", 409)
+        return get_helyes_json("Sikeres hozzáadás!")
 
     # hozzáad egy új "üres" kölotési kategóriát egy adott naphoz, paraméterek: datum, kategoria_nev_id
     @app.route("/api/add_koltesi_kategoria", methods=["POST"])
@@ -238,16 +240,16 @@ def create_app():
         napok = db.select_napi_koltesek((0, 2), (session['user_id'], datum))
         
         if not napok:
-            return get_error_json("A megadott napi költés nem létezik!")
+            return get_error_json("A megadott napi költés nem létezik!", 409)
 
         napi_id = napok[0][1] 
         
         er2 = db.add_koltesi_kategoria(napi_id, kategoria_id)
         
         if er2 == True:
-            return jsonify({"error": False, "info": "Sikeres hozzáadás!"})
+            return get_helyes_json("Sikeres hozzáadás!")
         elif isinstance(er2, str) and er2.startswith("UNIQUE"):
-            return get_error_json("Ez a kategória már hozzá van adva ehhez a naphoz!")
+            return get_error_json("Ez a kategória már hozzá van adva ehhez a naphoz!", 409)
         
         return get_error_json("Váratlan hiba történt a mentéskor.")
 
@@ -269,16 +271,17 @@ def create_app():
 
         er = db.add_koltesek(koltes_id, leiras, osszeg)
         if er == True:
-            return jsonify({"error": False, "info": "Sikeres hozzáadás!"})
+            return get_helyes_json("Sikeres hozzáadás!")
         else:
-            return get_error_json("A kért költés nem hozzáadható!")
+            return get_error_json("A kért költés nem hozzáadható!", 409)
 
     # visszaadja az összes a felhasználóhoz tartozó költési kategória nevet, minden adattal együtt.PL: [(1, 'Utazás', 'FFAA33', 'VVZDMQ'), ...]
     @app.route("/api/get_kategoria_nevek", methods=["GET"])
     def get_kategoria_nevek():
         # Ez a GET hívás megmarad az eredeti neven.
         if not (x := is_logged()): return x
-        return jsonify(db.select_kategoria_nevek(3, session['user_id']))
+        return jsonify(db.select_kategoria_nevek(3, session['user_id'])), 200
+
 
     @app.route("/api/add_kategoria_nev", methods=["POST"])
     def add_kategoria_nev():
@@ -294,21 +297,51 @@ def create_app():
 
         nev = data["nev"]
         szin_kod = data["szin_kod"]
-        try:
-            # db.add_category(nev, szin_kod, user_id)
-            return jsonify({"success": True}), 200
-        except Exception as e:
-            # Adatbázis/egyéb hiba esetén
-            print(f"Hiba kategória hozzáadásakor: {e}")
-            return get_error_json("Szerveroldali hiba a kategória mentésekor.")
+        if (x := db.add_kategoria_nev(nev, szin_kod, session['user_id'])) == True:
+            return get_helyes_json()
+        else:
+            return get_error_json(str(x),409)
         
     @app.route("/api/edit_kategoria_nev", methods=["PUT"])
     def edit_kategoria_nev(): # A nevet 'edit_kategoria_nev'-re cseréltük
         if not (x := is_logged()): return x
+        data = request.get_json(silent=True)
+        if not data:
+            return get_error_json("Hiányzó JSON!")
+
+        if "id" not in data:
+            return get_error_json("Hiányzó mező: szükséges az id mező!")
+        elif "nev" in data:
+            modositando_mezo = [1, data['nev']]
+        elif "szin_kod" in data:
+            modositando_mezo = [2, data['szin_kod']]
+        else: return get_error_json("Hiányzó mező: nev vagy szin_kod kötül valamelyik.")
+
+
+        if (x := db.edit_kategoria_nev((modositando_mezo[0], ), (modositando_mezo[1], ), (0, 3), (data["id"], session['user_id'])))  == True:
+            return get_helyes_json()
+        else:
+            return get_error_json(str(x), 409)
+
 
     @app.route("/api/delete_kategoria_nev", methods=["DELETE"])
     def delete_kategoria_nev(): # A nevet 'delete_kategoria_nev'-re cseréltük
         if not (x := is_logged()): return x
+
+        data = request.get_json(silent=True)
+        if not data:
+            return get_error_json("Hiányzó JSON!")
+
+        if "id" not in data:
+            return get_error_json("Hiányzó mező: szükséges az id mező!")
+        if (x:= db.delete_kategoria_nev((0, 3), (data['id'], session['user_id']))) == True:
+            return get_helyes_json()
+        else:
+            return get_error_json(str(x), 409)
+
+    
+
+
     # analysis
     @app.route('/analysis')
     def analysis():
