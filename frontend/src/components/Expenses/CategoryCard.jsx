@@ -17,6 +17,29 @@ export const CategoryCard = ({ category, isEditing, datum, onRefresh }) => {
     }
   }, [isEditing, category.name]);
 
+  const handleDeleteCategoryFromDay = async () => {
+  if (!window.confirm(`Biztosan eltávolítod a(z) "${category.name}" kategóriát erről a napról?`)) return;
+
+  try {
+    const idToDelete = category.koltes_id; 
+
+    const response = await fetch("/api/delete_kategoria_nev", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ koltes_id: idToDelete })
+    });
+
+    const result = await response.json();
+    if (!result.error) {
+      onRefresh(); 
+    } else {
+      alert(result.info);
+    }
+  } catch (err) {
+    console.error("Hiba a törlésnél:", err);
+  }
+};
+
   const handleSelectCategory = async (kategoria_id) => {
     try {
       const response = await fetch("/api/add_koltesi_kategoria", {
@@ -44,7 +67,6 @@ export const CategoryCard = ({ category, isEditing, datum, onRefresh }) => {
     0
   );
 
-  // Szín meghatározása (backend: szin_kod vagy color)
   const categoryColor = category.szin_kod || category.color || "#999999";
 
   return (
@@ -87,7 +109,6 @@ export const CategoryCard = ({ category, isEditing, datum, onRefresh }) => {
       </div>
 
       <div className="category-entries">
-        {/* Csak akkor mutatjuk a tételeket, ha már el van mentve a kategória */}
         {category.entries &&
           category.entries.map((entry, i) => (
             <EntryItem key={i} entry={entry} isEditing={isEditing} />
