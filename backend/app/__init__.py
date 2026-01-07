@@ -421,6 +421,45 @@ def create_app():
                 return jsonify({"error": True, "info": "A kiválasztott AI modell nem elérhető. Próbáld később!"}), 404
 
             return jsonify({"error": True, "info": f"AI hívás sikertelen: {error_msg}"})
+        
+
+    @app.route("/api/set_user_limit", methods=["POST"])
+    def set_user_limit():
+        auth_check = is_logged()
+        if auth_check != True:
+            return auth_check  
+
+        data = request.get_json(silent=True)
+        if not data or "limit" not in data:
+            return jsonify({"error": True, "info": "Hiányzó limit adat!"})
+
+        uj_limit = data["limit"]
+        user_id = session.get('user_id')
+
+        try:
+            db.execute("UPDATE felhasznalok SET havi_limit = ? WHERE id = ?", (uj_limit, user_id))
+            
+            return jsonify({"error": False, "info": "Sikeres mentés!"})
+            
+        except Exception as e:
+            print(f"ADATBÁZIS HIBA: {e}")
+            return jsonify({"error": True, "info": "Adatbázis hiba történt!"}), 500
+
+    @app.route("/api/get_user_limit", methods=["GET"])
+    def get_user_limit():
+        if (x := is_logged()) != True: return x
+        
+        user_id = session.get('user_id')
+        
+        try:
+            user_data = db.select_felhasznalo(2, user_id) 
+            
+            havi_limit = user_data[0][4] if user_data and len(user_data[0]) > 4 else 0
+            
+            return jsonify({"limit": havi_limit})
+        except Exception as e:
+            print(f"HIBA A LIMIT LEKÉRÉSNÉL: {e}")
+            return jsonify({"limit": 0, "error": str(e)})
 
     # statikus fájlok (JS, CSS)
     @app.route('/static/<path:filename>')

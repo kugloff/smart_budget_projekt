@@ -218,6 +218,16 @@ class Database:
     def edit_felhasznalo(self, user_id:str, koltesi_limit:int|None) -> bool:
         table_blueprint: TableBluePrint = self.tables["felhasznalok"]
         return self.execute(table_blueprint.ToUPDATE_TABLE((3, ), (0, )), (koltesi_limit, user_id), error_print=False)
+    
+    # költési limit beállitása
+    def set_user_limit(self, user_id, limit):
+        try:
+            self.execute("UPDATE felhasznalok SET havi_limit = ? WHERE id = ?", (limit, user_id))
+            return True
+        except Exception as e:
+            print(f"Hiba a limit mentésekor: {e}")
+            return False
+
 
     # napi költések kezelése
     def add_napi_koltes(self, user_id:str, datum:str) -> bool|str:
