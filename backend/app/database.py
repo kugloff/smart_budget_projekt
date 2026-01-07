@@ -352,7 +352,8 @@ class Database:
         query = """
                     SELECT 
                         kn.nev AS category, 
-                        SUM(k.osszeg) AS value
+                        SUM(k.osszeg) AS value,
+                        kn.szin_kod              -- EZT A SORT ADTAM HOZZÁ
                     FROM napi_koltesek nk
                     JOIN koltesi_kategoriak kk ON nk.kategoria_csoport_id = kk.kategoria_csoport_id
                     JOIN koltesek k ON kk.koltes_id = k.koltes_id
