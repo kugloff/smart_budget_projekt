@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { ChevronDown, ChevronUp, Trash2, Edit2, Save, X, Plus, AlertTriangle } from "lucide-react";
 import "./ExpensesPage.css";
 
-// --- CONFIRM MODAL (Változatlan) ---
 const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message }) => {
   if (!isOpen) return null;
   return (
@@ -32,20 +31,17 @@ export default function ExpensesPage() {
 
   const [modalConfig, setModalConfig] = useState({ isOpen: false, type: null, id: null, title: "", message: "" });
 
-  // --- ADATLEKÉRÉS ÉS LIMIT SZÁMÍTÁS ---
   const loadData = async () => {
     setLoading(true);
     try {
       const res = await fetch("/api/get_napi_koltesek");
       const rawData = await res.json();
       
-      // Limit mentése
       const currentLimit = rawData.havi_limit || 0;
       setMonthlyLimit(currentLimit);
 
       const sourceData = rawData.napok || {};
       
-      // 1. Adatok formázása
       let formattedDays = Object.entries(sourceData).map(([dateKey, categoriesObj]) => {
         const categoriesArray = Object.entries(categoriesObj).map(([catName, catData]) => ({
           id: catData.koltes_id,
@@ -65,25 +61,21 @@ export default function ExpensesPage() {
           date: dateKey,
           total: dayTotal,
           categories: categoriesArray,
-          isOverLimit: false // Alapértelmezett
+          isOverLimit: false
         };
       });
 
-      // 2. Limit túllépés számítása (Kumulatív)
-      // Ehhez időrendbe kell tenni (legrégebbi elöl), hogy lássuk, hogyan fogy a keret
       formattedDays.sort((a, b) => new Date(a.date) - new Date(b.date));
 
       let runningTotal = 0;
       formattedDays = formattedDays.map(day => {
           runningTotal += day.total;
-          // Ha van limit beállítva, és a halmozott összeg túllépte azt
           if (currentLimit > 0 && runningTotal > currentLimit) {
               return { ...day, isOverLimit: true };
           }
           return day;
       });
 
-      // 3. Visszarendezés csökkenőbe (legújabb elöl) a megjelenítéshez
       formattedDays.sort((a, b) => new Date(b.date) - new Date(a.date));
       
       setDays(formattedDays);
@@ -114,7 +106,7 @@ export default function ExpensesPage() {
     if (type === 'day') {
       setModalConfig({
         isOpen: true, type: 'day', id: id, title: "Nap törlése",
-        message: `Biztosan törölni szeretnéd a(z) ${id} napot?`
+        message: `Biztosan törölni szeretnéd a(z) ${id} napot? Minden adat elvész!`
       });
     } else if (type === 'entry') {
       setModalConfig({
@@ -129,30 +121,44 @@ export default function ExpensesPage() {
     }
   };
 
+  // --- TÖRLÉS LOGIKA JAVÍTVA ---
   const handleConfirmDelete = async () => {
     const { type, id } = modalConfig;
     let url = "";
-    let body = {};
-
+    
+    // A megfelelő API végpont kiválasztása
     if (type === 'day') {
-        alert("Nap törlése funkció még nincs backend oldalon implementálva.");
-        setModalConfig({ ...modalConfig, isOpen: false });
-        return;
-    } else if (type === 'entry') {
-        url = "/api/delete_koltes"; 
-        body = { where_mezo: [0], where_adat: [id] }; 
+        url = "/api/delete_napi_koltes"; // ÚJ VÉGPONT
     } else if (type === 'category') {
         url = "/api/delete_koltesi_kategoria";
-        body = { where_mezo: [1], where_adat: [id] }; 
+    } else if (type === 'entry') {
+        url = "/api/delete_koltes";
     }
 
-    if (type === 'entry') {
-         console.log("Törlés API hívás:", type, id);
+    if (!url) {
+        setModalConfig({ ...modalConfig, isOpen: false });
+        return;
     }
-    
-    alert(`Törlési kérelem elküldve: ${type} ID: ${id}. (Backend illesztés szükséges)`);
-    loadData(); 
-    setModalConfig({ ...modalConfig, isOpen: false });
+
+    try {
+      const res = await fetch(url, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: id })
+      });
+      
+      if (res.ok) {
+        await loadData(); // Sikeres törlés után frissítés
+      } else {
+        const err = await res.json();
+        alert(err.info || "Hiba történt a törlés során!");
+      }
+    } catch (err) {
+      console.error("Hiba:", err);
+      alert("Hálózati hiba!");
+    } finally {
+      setModalConfig({ ...modalConfig, isOpen: false });
+    }
   };
 
   return (
@@ -190,7 +196,6 @@ export default function ExpensesPage() {
   );
 }
 
-// --- NAP KÁRTYA (PIROSÍTÁSSAL) ---
 const DayCard = ({ day, categoryNames, onDelete, onDeleteEntry, onDeleteCategory, onRefresh }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -207,39 +212,62 @@ const DayCard = ({ day, categoryNames, onDelete, onDeleteEntry, onDeleteCategory
     setIsEditing(true);
   };
 
+  // --- MENTÉS LOGIKA JAVÍTVA ---
   const handleSave = async (e) => {
     e.stopPropagation();
-    
     const promises = [];
 
     for (const cat of localCategories) {
-        for (const entry of cat.entries) {
-            if (!entry.id || entry.id.toString().startsWith('temp')) {
-                if (entry.description && entry.amount) {
-                    promises.push(fetch("/api/add_koltes", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ 
-                            koltes_id: cat.id, 
-                            leiras: entry.description,
-                            osszeg: Number(entry.amount)
-                        })
-                    }));
-                }
-            } 
-            else {
-               console.log("Meglévő tétel frissítése (Backend route kell hozzá):", entry);
-            }
+      for (const entry of cat.entries) {
+        // Tartalom ellenőrzés: ne mentsünk üres sorokat
+        const hasContent = (entry.description && entry.description.trim() !== "") || (entry.amount && Number(entry.amount) > 0);
+        
+        // 1. Új tétel (temp ID)
+        if (!entry.id || entry.id.toString().startsWith('temp')) {
+          if (hasContent) {
+            promises.push(
+              fetch("/api/add_koltes", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  koltes_id: cat.id,
+                  leiras: entry.description,
+                  osszeg: Number(entry.amount)
+                })
+              })
+            );
+          }
+        } 
+        // 2. Meglévő tétel szerkesztése (PUT)
+        else {
+          promises.push(
+            fetch("/api/edit_koltes", {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                id: entry.id,
+                leiras: entry.description,
+                osszeg: Number(entry.amount)
+              })
+            })
+          );
         }
+      }
     }
 
     try {
-        await Promise.all(promises);
+      const results = await Promise.all(promises);
+      const allOk = results.every(r => r.ok);
+      
+      if (allOk) {
         setIsEditing(false);
-        onRefresh();
+        await onRefresh();
+      } else {
+        alert("Néhány tételt nem sikerült menteni!");
+      }
     } catch (error) {
-        console.error("Hiba a mentésnél:", error);
-        alert("Hiba történt a mentés során!");
+      console.error("Hiba a mentésnél:", error);
+      alert("Hálózati hiba történt a mentéskor.");
     }
   };
 
@@ -283,7 +311,6 @@ const DayCard = ({ day, categoryNames, onDelete, onDeleteEntry, onDeleteCategory
   };
 
   return (
-    // ITT ADJUK HOZZÁ AZ 'over-limit' CLASS-T HA IGAZ A FELTÉTEL
     <div className={`day-card ${isEditing ? 'editing-mode' : ''} ${day.isOverLimit ? 'over-limit' : ''}`}>
       <div className="day-header">
         <div className="day-info" onClick={() => setIsOpen(!isOpen)} style={{cursor: "pointer", flex: 1}}>

@@ -118,7 +118,10 @@ class TableBluePrint:
         return f"INSERT INTO {self.table_name} ({','.join(self.mezonevek)}) VALUES ({', '.join(['?']*values_db)})"
 
     def ToUPDATE_TABLE(self, edit_mezo:tuple[int, ...], where_mezo:tuple[int, ...]) -> str:
-        return f"UPDATE {self.table_name} SET {self.generate_where(edit_mezo)} WHERE {self.generate_where(where_mezo)}"
+            set_lista = [self.mezonevek[i] + '=?' for i in edit_mezo]
+            set_clause = ', '.join(set_lista)
+
+            return f"UPDATE {self.table_name} SET {set_clause} WHERE {self.generate_where(where_mezo)}"
 
     def ToDELETE_FROM(self, where_mezo:tuple[int, ...]) -> str:
         return f"DELETE FROM {self.table_name} WHERE {self.generate_where(where_mezo)}"
@@ -254,9 +257,11 @@ class Database:
         table_blueprint: TableBluePrint = self.tables["koltesek"]
         leiras = None if leiras == "" or leiras is None else leiras.strip()
         return self.execute(table_blueprint.ToINSERT_INTO(4), (None, koltes_id, leiras, osszeg), return_integritas_error=True)
-    def edit_koltesek(self, edit_mezo:tuple[int, ...], edit_vaule:int, where_vaule:int) -> bool|None:
+    def edit_koltesek(self, edit_mezo:tuple[int, ...], values: tuple, entry_id: int) -> bool|str:
         table_blueprint: TableBluePrint = self.tables["koltesek"]
-        return self.execute(table_blueprint.ToUPDATE_TABLE(edit_mezo, (0, )), (edit_vaule, where_vaule), return_integritas_error=True)
+        query = table_blueprint.ToUPDATE_TABLE(edit_mezo, (0, ))
+        params = values + (entry_id,)
+        return self.execute(query, params, return_integritas_error=True)
     def delete_koltesek(self, where_mezo:tuple[int, ...], where_adat:tuple):
         table_blueprint: TableBluePrint = self.tables["koltesek"]
         return self.execute(table_blueprint.ToDELETE_FROM(where_mezo), where_adat, return_integritas_error=True)

@@ -305,6 +305,63 @@ def create_app():
         else:
             return get_error_json("A kért költés nem hozzáadható!", 409)
 
+    @app.route("/api/delete_napi_koltes", methods=["DELETE"])
+    def delete_napi_koltes_api():
+        if (x := is_logged()) != True: return x
+        data = request.get_json(silent=True)
+
+        if not data or "id" not in data: 
+            return get_error_json("Hiányzó dátum!")
+        
+        er = db.delete_napi_koltes((0, 2), (session['user_id'], data["id"]))
+        
+        if er == True: 
+            return get_helyes_json("Nap törölve!")
+        return get_error_json("Hiba a nap törlésénél!")
+
+    @app.route("/api/delete_koltesi_kategoria", methods=["DELETE"])
+    def delete_koltesi_kategoria_api():
+        if (x := is_logged()) != True: return x
+        data = request.get_json(silent=True)
+        if not data or "id" not in data: 
+            return get_error_json("Hiányzó ID!")
+        
+        er = db.delete_koltesi_kategoria((1,), (data["id"],)) 
+        
+        if er == True: 
+            return get_helyes_json("Kategória törölve!")
+        return get_error_json("Hiba a kategória törlésénél!")
+
+    @app.route("/api/delete_koltes", methods=["DELETE"])
+    def delete_koltes_api():
+        if (x := is_logged()) != True: return x
+        data = request.get_json(silent=True)
+        if not data or "id" not in data: 
+            return get_error_json("Hiányzó ID!")
+        
+        er = db.delete_koltesek((0,), (data["id"],))
+        
+        if er == True: 
+            return get_helyes_json("Tétel törölve!")
+        return get_error_json("Hiba a tétel törlésénél!")
+
+    @app.route("/api/edit_koltes", methods=["PUT"])
+    def edit_koltes():
+        if (x := is_logged()) != True: return x
+        data = request.get_json(silent=True)
+        if not data or "id" not in data: 
+            return get_error_json("Hiányzó adatok!")
+        
+        entry_id = data["id"]
+        leiras = data.get("leiras", "")
+        osszeg = data.get("osszeg", 0)
+
+        er = db.edit_koltesek((2, 3), (leiras, osszeg), entry_id)
+        
+        if er == True: 
+            return get_helyes_json("OK")
+        return get_error_json(str(er), 409)
+
     # visszaadja az összes a felhasználóhoz tartozó költési kategória nevet, minden adattal együtt.PL: [(1, 'Utazás', 'FFAA33', 'VVZDMQ'), ...]
     @app.route("/api/get_kategoria_nevek", methods=["GET"])
     def get_kategoria_nevek():
