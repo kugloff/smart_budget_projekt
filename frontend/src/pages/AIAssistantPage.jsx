@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
+import { Sparkles, BarChart3, Calendar, Bot, Loader2 } from "lucide-react";
 import "./AIAssistantPage.css";
 
 export default function AIAssistantPage() {
@@ -38,9 +39,9 @@ export default function AIAssistantPage() {
       });
 
       const data = await res.json();
-      setResponse(data.result || data.info || "Nincs válasz.");
+      setResponse(data.result || data.info || "Sajnos nem érkezett válasz az AI-tól.");
     } catch (err) {
-      setResponse("Hiba történt az AI hívás közben.");
+      setResponse("Hálózati hiba történt az elemzés során.");
     }
 
     setLoading(false);
@@ -50,18 +51,14 @@ export default function AIAssistantPage() {
     <div className="page-container">
       <div className="card">
         <div className="card-content">
-          <p className="subtitle">
-            Válaszd ki, milyen adatokat szeretnél elemeztetni. <br/>
-            A válaszokat a Google Gemini mesterséges intelligencia generálja.
-          </p>
-
           <div className="button-grid">
             <button
               className="action-btn"
               onClick={() => callAI("all")}
               disabled={loading || !userData}
             >
-              {loading ? "Betöltés..." : "Összes kiadás elemzése"}
+              <BarChart3 size={20} />
+              {loading && userData ? "Elemzés..." : "Teljes elemzés"}
             </button>
 
             <button
@@ -69,17 +66,30 @@ export default function AIAssistantPage() {
               onClick={() => callAI("year")}
               disabled={loading || !userData}
             >
-              {loading ? "Betöltés..." : "Idei év elemzése"}
+              <Calendar size={20} />
+              {loading && userData ? "Elemzés..." : "Idei év áttekintése"}
             </button>
           </div>
 
-          <div className="response-box">
-            {response 
-              ? <ReactMarkdown>{response}</ReactMarkdown> 
-              : (!userData 
-                  ? "Felhasználói adatok betöltése..." 
-                  : "Válassz a lehetőségek közül. Az AI válasza itt fog megjelenni...")}
+          {/* Válasz doboz */}
+          <div className="response-container">
+            {loading ? (
+              <div className="loading-state">
+                <Loader2 className="spinner" />
+                <p>A Gemini AI gondolkodik...</p>
+              </div>
+            ) : response ? (
+              <div className="markdown-content">
+                <ReactMarkdown>{response}</ReactMarkdown>
+              </div>
+            ) : (
+              <div className="loading-state" style={{ opacity: 0.5 }}>
+                <Bot size={48} style={{ marginBottom: 15 }} />
+                <p>{!userData ? "Adatok betöltése..." : "Válassz egy gombot az indításhoz!"}</p>
+              </div>
+            )}
           </div>
+
         </div>
       </div>
     </div>
