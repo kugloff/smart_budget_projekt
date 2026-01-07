@@ -158,7 +158,8 @@ export const CategoryManagerModal = ({ isOpen, onClose }) => {
         if (field === 'name') {
             body = { id: categoryId, nev: value };
         } else if (field === 'color') {
-            body = { id: categoryId, szin_kod: value };
+            const cleanColor = value.startsWith('#') ? value.slice(1) : value;
+            body = { id: categoryId, szin_kod: cleanColor };
         } else {
             return;
         }
