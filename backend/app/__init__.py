@@ -164,13 +164,10 @@ def create_app():
     # GET - lekéri az összeset, ha kap egy datum paramétert akkor csak azt az egy dátumot adja vissza.
     @app.route("/api/get_napi_koltesek", methods=["GET"])
     def get_napi_koltesek():
-        if (x := is_logged()) != True: return x  # login ellenőrzés
+        if (x := is_logged()) != True: return x
         
         user_id = session['user_id']
-        
         rows = db.SELECT_teljes_napi_nezet(user_id)
-        
-        user_data = db.select_felhasznalo(0, user_id)
         try:
             limit_rows = db.fetch_all("SELECT koltesi_limit FROM felhasznalok WHERE user_id = ?", (user_id,))
             havi_limit = limit_rows[0][0] if limit_rows and limit_rows[0][0] else 0
@@ -192,25 +189,25 @@ def create_app():
             if datum not in napok:
                 napok[datum] = {}
 
-            if kat_nev not in napok[datum]:
-                napok[datum][kat_nev] = {
-                    "szin_kod": szin,
-                    "koltes_id": kat_koltes_id,
-                    "koltesek": []
-                }
+            if kat_nev is not None:
+                if kat_nev not in napok[datum]:
+                    napok[datum][kat_nev] = {
+                        "szin_kod": szin,
+                        "koltes_id": kat_koltes_id,
+                        "koltesek": []
+                    }
 
-            if entry_id is not None:
-                napok[datum][kat_nev]["koltesek"].append({
-                    "id": entry_id,
-                    "leiras": leiras,
-                    "osszeg": osszeg
-                })
+                if entry_id is not None:
+                    napok[datum][kat_nev]["koltesek"].append({
+                        "id": entry_id,
+                        "leiras": leiras,
+                        "osszeg": osszeg
+                    })
 
         return jsonify({
             "havi_limit": havi_limit,
             "napok": napok
         }), 200
-
 
     # visszaadja azt az egy költési kategóriához tartozó költéseket melyet a paraméterek pontosan meghatároznak. kötelező paraméterek: datum, kategoria_nev
     # visszaad: {"koltesek": [...]} formában (ugyan úgy mint az összes nap lekérésénél)
@@ -241,19 +238,25 @@ def create_app():
     # hozzáad egy új "üres" napot, igényel egy datum json mezőt.
     @app.route("/api/add_napi_koltes", methods=["POST"])
     def add_napi_koltes():
-        if (x := is_logged()) != True: return x  # login ellenőrzés
+        if (x := is_logged()) != True: return x
+        
         data = request.get_json(silent=True)
         if not data:
             return get_error_json("Hiányzó JSON!")
         if "datum" not in data:
-            return get_error_json("A 'datum' mező nem létezik!")
+            return get_error_json("A 'datum' mező hiányzik!")
 
-        ad = db.add_napi_koltes(session['user_id'], data["datum"])
-        if not ad:
-            return get_error_json("A kért nap nem hozzáadható!", 409)
-        elif ad.startswith("UNIQUE"):
-            return get_error_json("Minden dátum csak egyszer szerepelhet!", 409)
-        return get_helyes_json("Sikeres hozzáadás!")
+        eredmeny = db.add_napi_koltes(session['user_id'], data["datum"])
+
+        if eredmeny is True:
+            return get_helyes_json("Nap sikeresen hozzáadva!")
+        
+        error_str = str(eredmeny).upper()
+        
+        if "UNIQUE" in error_str:
+            return get_error_json("Ez a nap már szerepel a listában!", 409)
+            
+        return get_error_json(f"Hiba a mentés során: {eredmeny}", 500)
 
     # hozzáad egy új "üres" kölotési kategóriát egy adott naphoz, paraméterek: datum, kategoria_nev_id
     @app.route("/api/add_koltesi_kategoria", methods=["POST"])

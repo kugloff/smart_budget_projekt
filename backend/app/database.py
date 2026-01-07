@@ -231,12 +231,14 @@ class Database:
             print(f"Hiba a limit mentésekor: {e}")
             return False
 
-
     # napi költések kezelése
     def add_napi_koltes(self, user_id:str, datum:str) -> bool|str:
         table_blueprint: TableBluePrint = self.tables["napi_koltesek"]
-        # ha sikeresen a hozzáadás True, ha UNIQUE(user_id, datum) sért akkor "IntegrityError" ha egyéb hiba akkor False
-        return self.execute(table_blueprint.ToINSERT_INTO(3), (user_id, None, datum), return_integritas_error=True)
+        return self.execute(
+            table_blueprint.ToINSERT_INTO(3), 
+            (user_id, None, datum), 
+            return_integritas_error=True
+        )
     def delete_napi_koltes(self, where_mezo:tuple[int, ...], where_adat) -> bool:
         table_blueprint: TableBluePrint = self.tables["napi_koltesek"]
         return self.execute(table_blueprint.ToDELETE_FROM(where_mezo), where_adat, error_print=False)
@@ -312,24 +314,19 @@ class Database:
 
 
     def SELECT_teljes_napi_nezet(self, user_id:str) -> list:
-        # 1. Napi költések (dátum)
-        # 2. Költési kategóriák (kapcsolat)
-        # 3. Kategória nevek (név, szín)
-        # 4. Költések (konkrét tételek: leírás, összeg) - üres kategóriák is látszódjanak!
-        
         query = """
             SELECT 
                 nk.datum,                   -- 0
-                nk.kategoria_csoport_id,    -- 1 (Csoport ID)
-                kn.nev,                     -- 2
-                kn.szin_kod,                -- 3
-                kk.koltes_id,               -- 4 (Kategória egyedi ID-ja ezen a napon)
-                k.id,                       -- 5 (Tétel ID)
+                nk.kategoria_csoport_id,    -- 1
+                kn.nev,                     -- 2 (Lehet NULL)
+                kn.szin_kod,                -- 3 (Lehet NULL)
+                kk.koltes_id,               -- 4 (Lehet NULL)
+                k.id,                       -- 5
                 k.leiras,                   -- 6
                 k.osszeg                    -- 7
             FROM napi_koltesek nk
-            JOIN koltesi_kategoriak kk ON nk.kategoria_csoport_id = kk.kategoria_csoport_id
-            JOIN kategoria_nevek kn ON kk.kategoria_nev_id = kn.id
+            LEFT JOIN koltesi_kategoriak kk ON nk.kategoria_csoport_id = kk.kategoria_csoport_id
+            LEFT JOIN kategoria_nevek kn ON kk.kategoria_nev_id = kn.id
             LEFT JOIN koltesek k ON kk.koltes_id = k.koltes_id
             WHERE nk.user_id = ?
             ORDER BY nk.datum DESC, kn.nev ASC
