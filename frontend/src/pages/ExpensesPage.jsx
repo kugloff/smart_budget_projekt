@@ -31,8 +31,10 @@ export default function ExpensesPage() {
 
   const [modalConfig, setModalConfig] = useState({ isOpen: false, type: null, id: null, title: "", message: "" });
 
-  const loadData = async () => {
-    setLoading(true);
+  const loadData = async (showLoading = true) => {
+    if (showLoading) {
+      setLoading(true);
+    }
     try {
       const res = await fetch("/api/get_napi_koltesek");
       const rawData = await res.json();
@@ -83,7 +85,9 @@ export default function ExpensesPage() {
     } catch (err) {
       console.error("Hiba:", err);
     } finally {
-      setLoading(false);
+      if (showLoading) {
+        setLoading(false);
+      }
     }
   };
 
@@ -98,7 +102,7 @@ export default function ExpensesPage() {
   };
 
   useEffect(() => {
-    loadData();
+    loadData(true);
     loadCategoryNames();
   }, []);
 
@@ -121,14 +125,12 @@ export default function ExpensesPage() {
     }
   };
 
-  // --- TÖRLÉS LOGIKA JAVÍTVA ---
   const handleConfirmDelete = async () => {
     const { type, id } = modalConfig;
     let url = "";
     
-    // A megfelelő API végpont kiválasztása
     if (type === 'day') {
-        url = "/api/delete_napi_koltes"; // ÚJ VÉGPONT
+        url = "/api/delete_napi_koltes";
     } else if (type === 'category') {
         url = "/api/delete_koltesi_kategoria";
     } else if (type === 'entry') {
@@ -148,7 +150,7 @@ export default function ExpensesPage() {
       });
       
       if (res.ok) {
-        await loadData(); // Sikeres törlés után frissítés
+        await loadData(false); 
       } else {
         const err = await res.json();
         alert(err.info || "Hiba történt a törlés során!");
@@ -212,17 +214,14 @@ const DayCard = ({ day, categoryNames, onDelete, onDeleteEntry, onDeleteCategory
     setIsEditing(true);
   };
 
-  // --- MENTÉS LOGIKA JAVÍTVA ---
   const handleSave = async (e) => {
     e.stopPropagation();
     const promises = [];
 
     for (const cat of localCategories) {
       for (const entry of cat.entries) {
-        // Tartalom ellenőrzés: ne mentsünk üres sorokat
         const hasContent = (entry.description && entry.description.trim() !== "") || (entry.amount && Number(entry.amount) > 0);
         
-        // 1. Új tétel (temp ID)
         if (!entry.id || entry.id.toString().startsWith('temp')) {
           if (hasContent) {
             promises.push(
@@ -238,7 +237,6 @@ const DayCard = ({ day, categoryNames, onDelete, onDeleteEntry, onDeleteCategory
             );
           }
         } 
-        // 2. Meglévő tétel szerkesztése (PUT)
         else {
           promises.push(
             fetch("/api/edit_koltes", {
@@ -261,7 +259,7 @@ const DayCard = ({ day, categoryNames, onDelete, onDeleteEntry, onDeleteCategory
       
       if (allOk) {
         setIsEditing(false);
-        await onRefresh();
+        await onRefresh(false);
       } else {
         alert("Néhány tételt nem sikerült menteni!");
       }
@@ -303,7 +301,8 @@ const DayCard = ({ day, categoryNames, onDelete, onDeleteEntry, onDeleteCategory
         const result = await res.json();
         
         if (!result.error) {
-            await onRefresh(); 
+            // MÓDOSÍTVA: false paraméter, hogy ne záródjon be
+            await onRefresh(false); 
         } else {
             alert(result.info);
         }
