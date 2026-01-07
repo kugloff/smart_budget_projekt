@@ -93,9 +93,8 @@ def create_app():
                 felhasznalo = db.select_felhasznalo(1, email)
                 if not felhasznalo:
                     email = email.upper()
-                    felhasznalo = db.select_felhasznalo(0,
-                                                        email)  # ha a beírt adat nem egy email akkor rápróbálunk hátha nevet adatott meg.
-
+                    felhasznalo = db.select_felhasznalo(0, email)  # ha a beírt adat nem egy email akkor rápróbálunk hátha nevet adatott meg.
+                print(felhasznalo)
                 if not felhasznalo:
                     return jsonify({"success": False, "message": "Hibás email cím vagy jelszó!"}), 401
 
@@ -147,7 +146,7 @@ def create_app():
             uj_felhasznalo_id = db.add_felhasznalo(name, email, generate_password_hash(jelszo))
             session.clear()
             # Itt ne a 'name'-et, hanem az ID-t mentsük el!
-            session['user_id'] = uj_felhasznalo_id 
+            session['user_id'] = name
             session['user_email'] = email
             return jsonify({"success": True, "message": "Sikeres regisztráció!"}), 200
 
@@ -248,6 +247,7 @@ def create_app():
 
         print(data["datum"])
         eredmeny = db.add_napi_koltes(session['user_id'], data["datum"])
+        print(eredmeny)
 
         if eredmeny is True:
             return get_helyes_json("Nap sikeresen hozzáadva!")
