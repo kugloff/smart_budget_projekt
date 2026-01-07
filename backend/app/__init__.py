@@ -246,14 +246,13 @@ def create_app():
         if "datum" not in data:
             return get_error_json("A 'datum' mező hiányzik!")
 
+        print(data["datum"])
         eredmeny = db.add_napi_koltes(session['user_id'], data["datum"])
 
         if eredmeny is True:
             return get_helyes_json("Nap sikeresen hozzáadva!")
         
-        error_str = str(eredmeny).upper()
-        
-        if "UNIQUE" in error_str:
+        if "UNIQUE" in eredmeny:
             return get_error_json("Ez a nap már szerepel a listában!", 409)
             
         return get_error_json(f"Hiba a mentés során: {eredmeny}", 500)
@@ -386,7 +385,7 @@ def create_app():
             return get_error_json("Hiányzó mezők: nev és szin_kod szükséges!")
 
         nev = data["nev"]
-        szin_kod = data["szin_kod"]
+        szin_kod = data["szin_kod"][1:] # #FFFFFF - formában jön az adat
         if (x := db.add_kategoria_nev(nev, szin_kod, session['user_id'])) == True:
             return get_helyes_json()
         else:

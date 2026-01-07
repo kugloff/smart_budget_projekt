@@ -94,6 +94,10 @@ print(db.select_kategoria_nevek(3, USER))
 #print("koltesi kategóriák tábla: ", db.fetch_all("select * from koltesi_kategoriak"))
 #print("Kategória nevek tábla: ", db.select_kategoria_nevek(3, USER))
 
+def clear_build_db_penzugyek():
+    db.execute("DELETE FROM koltesek")
+    db.execute("DELETE FROM koltesi_kategoriak")
+    db.execute("DELETE FROM napi_koltesek")
 
 '''
 db.execute("DELETE FROM koltesek")
@@ -122,9 +126,10 @@ db.add_koltesek(4, "33%-os tortaelvétel", 50_000_000)
 db.add_koltesek(4, "Láda gyémánt 33% ", 50_000_000)
 '''
 
+clear_build_db_penzugyek()
 
-
-
+x = db.select_kategoria_nevek((0, ), (USER, ))
+print(x)
 print("-"*50)
 #a = get_napi_koltesek1()
 #b = get_napi_koltesek2()
