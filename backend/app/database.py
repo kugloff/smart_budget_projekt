@@ -306,6 +306,31 @@ class Database:
         else: return self.fetch_all(table_blueprint.To_Join(self.tables[kapcsolt_tabla_index], join_type, where_mezo, operator, return_count), where_adat)
 
 
+    def SELECT_teljes_napi_nezet(self, user_id:str) -> list:
+        # 1. Napi költések (dátum)
+        # 2. Költési kategóriák (kapcsolat)
+        # 3. Kategória nevek (név, szín)
+        # 4. Költések (konkrét tételek: leírás, összeg) - üres kategóriák is látszódjanak!
+        
+        query = """
+            SELECT 
+                nk.datum,                   -- 0
+                nk.kategoria_csoport_id,    -- 1 (Csoport ID)
+                kn.nev,                     -- 2
+                kn.szin_kod,                -- 3
+                kk.koltes_id,               -- 4 (Kategória egyedi ID-ja ezen a napon)
+                k.id,                       -- 5 (Tétel ID)
+                k.leiras,                   -- 6
+                k.osszeg                    -- 7
+            FROM napi_koltesek nk
+            JOIN koltesi_kategoriak kk ON nk.kategoria_csoport_id = kk.kategoria_csoport_id
+            JOIN kategoria_nevek kn ON kk.kategoria_nev_id = kn.id
+            LEFT JOIN koltesek k ON kk.koltes_id = k.koltes_id
+            WHERE nk.user_id = ?
+            ORDER BY nk.datum DESC, kn.nev ASC
+        """
+        return self.fetch_all(query, (user_id,))
+
     def SELECT_elemzes_havi_lebontas(self, user_id:str, ev:str) -> list:
         query = """
                     SELECT 

@@ -10,3 +10,227 @@
     display: flex;
     flex-direction: column;
 }
+
+.day-card{
+    width:100%;
+    background:white;
+    border-radius:16px;
+    margin-bottom:16px;
+    padding:16px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.05);
+}
+
+.day-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.day-info{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.day-category-dots{
+    display:flex;
+    gap:6px;
+    margin-left:12px;
+    align-items: center;
+    flex-wrap: wrap; /* Ha sok pötty van, törjön sorba */
+}
+
+.small-dot{
+    width:14px;
+    height:14px;
+    border-radius:50%;
+    display: inline-block;
+    border: 1px solid rgba(0,0,0,0.1); /* Halvány keret */
+    box-shadow: 1px 1px 2px rgba(0,0,0,0.2), inset -1px -1px 2px rgba(0,0,0,0.1); /* 3D hatás */
+}
+
+.day-actions-total{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.day-total{
+    font-weight:500;
+    color:#000;
+    margin-right:12px;
+}
+
+.day-actions-total button{
+    background:none;
+    border:none;
+    cursor:pointer;
+    transition:transform 0.2s ease;
+}
+
+.day-actions-total button:hover{
+    transform:scale(1.1);
+}
+
+.day-content{
+    margin-top:12px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+.day-info input{
+    font-size:16px;
+    padding:4px 8px;
+    border-radius:16px;
+    border:1px solid #ccc;
+}
+
+.icon-btn{
+    background:none;
+    border:none;
+    cursor:pointer;
+    padding:4px;
+    color:#444;
+    transition:color 0.2s ease,transform 0.2s ease;
+}
+
+.icon-btn:hover{
+    color:#000;
+    transform:scale(1.1);
+}
+
+.add-entry-btn,
+.add-category-btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    margin-top:10px;
+    background-color:white;
+    color:#1e3a8a;
+    border: 2px solid #1e3a8a;
+    border-radius:16px;
+    padding:6px 10px;
+    font-size:14px;
+    font-weight:500;
+    cursor:pointer;
+    transition:background-color 0.2s ease;
+}
+
+.category-card{
+    display:flex;
+    flex-direction:column;
+    padding:12px;
+    border:2px solid #1e3a8a;
+    border-radius:16px;
+    background:#fafafa;
+    transition:background 0.2s ease;
+}
+
+.category-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:6px;
+}
+
+.category-left{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.color-dot{
+    width:14px;
+    height:14px;
+    border-radius:50%;
+    display:inline-block;
+    border:1px solid #ccc;
+}
+
+.category-name{
+    font-weight:500;
+    font-size:16px;
+    color:#000;
+}
+
+.category-total{
+    font-weight:900;
+    font-size:16px;
+    min-width:120px;
+    margin-right:10px;
+    text-align:right;
+    color:#1e3a8a;
+}
+
+.category-entries{
+    display:flex;
+    flex-direction:column;
+    margin-left:22px;
+    gap:6px;
+}
+
+.category-select{
+    font-size:16px;
+    padding:4px 6px;
+    border-radius:16px;
+    border:1px solid #ccc;
+    background-color:#fff;
+    color:#000;
+}
+
+.entry-item-container{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    background:#f9f9f9;
+    border:2px solid #1e3a8a;
+    border-radius:16px;
+    padding:6px 10px;
+    transition:background-color 0.2s ease;
+}
+
+.entry-item-container:hover{
+    background:#f2f6ff;
+}
+
+.entry-item-container input{
+    font-size:14px;
+    border:1px solid #ccc;
+    border-radius:16px;
+    padding:4px 6px;
+}
+
+.entry-description-input{
+    flex:3;
+    margin-right:8px;
+}
+
+.entry-amount-input{
+    width:120px;
+    text-align:right;
+}
+
+.delete-entry-btn{
+    background:none;
+    border:none;
+    color:#000;
+    cursor:pointer;
+    transition:color 0.2s ease;
+}
+
+.delete-entry-btn:hover{
+    color:#444;
+}
+
+.day-card.over-limit {
+    background-color: #fef2f2;
+    border: 1px solid #fca5a5;
+}
+
+.day-card.over-limit .day-total {
+    color: #dc2626;
+    font-weight: 700;
+}

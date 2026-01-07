@@ -165,21 +165,51 @@ def create_app():
     @app.route("/api/get_napi_koltesek", methods=["GET"])
     def get_napi_koltesek():
         if (x := is_logged()) != True: return x  # login ellenőrzés
-        datum = request.args.get("datum")
-        eredmeny = {}
+        
+        user_id = session['user_id']
+        
+        rows = db.SELECT_teljes_napi_nezet(user_id)
+        
+        user_data = db.select_felhasznalo(0, user_id)
+        try:
+            limit_rows = db.fetch_all("SELECT koltesi_limit FROM felhasznalok WHERE user_id = ?", (user_id,))
+            havi_limit = limit_rows[0][0] if limit_rows and limit_rows[0][0] else 0
+        except:
+            havi_limit = 0
 
-        if datum is None:
-            napok = db.select_napi_koltesek(0, session['user_id'])
-        else:
-            napok = db.select_napi_koltesek((0, 2), (session['user_id'], datum))
-            if not napok: # != []
-                return get_error_json("A kért nap nem található", 409)
+        napok = {}
 
-        for i in napok:
-            datum = i[2]
-            eredmeny[datum] = get_nap_kategoriak(i[1])
+        for row in rows:
+            datum = row[0]
+            kat_nev = row[2]
+            szin = row[3]
+            kat_koltes_id = row[4]
+            
+            entry_id = row[5]
+            leiras = row[6]
+            osszeg = row[7]
 
-        return jsonify(eredmeny), 200
+            if datum not in napok:
+                napok[datum] = {}
+
+            if kat_nev not in napok[datum]:
+                napok[datum][kat_nev] = {
+                    "szin_kod": szin,
+                    "koltes_id": kat_koltes_id,
+                    "koltesek": []
+                }
+
+            if entry_id is not None:
+                napok[datum][kat_nev]["koltesek"].append({
+                    "id": entry_id,
+                    "leiras": leiras,
+                    "osszeg": osszeg
+                })
+
+        return jsonify({
+            "havi_limit": havi_limit,
+            "napok": napok
+        }), 200
 
 
     # visszaadja azt az egy költési kategóriához tartozó költéseket melyet a paraméterek pontosan meghatároznak. kötelező paraméterek: datum, kategoria_nev
