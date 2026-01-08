@@ -1,5 +1,5 @@
 # Bejelentkezés és Regisztrációs teszt jegyzőkönyv
-| Tulajdonság | |
+| Tulajdonság | Adat |
 |:---|:---|
 | Tesztelést végezte | Kis Gergely Sándor |
 | Operációs rendszer | Windows 11 |
@@ -8,7 +8,7 @@
 
 ---
 
-## Testelés célja:
+## Tesztelés célja:
 Annak ellenőzése, hogy a webalkalmazás megfelelően elérhető-e a megadott ip címről, és ezután az oldalra való bejelentkezés és regisztráció a követelményeknek megfelel-e.
 
 ### Teszt esetek lehetséges ítéletei priolitás szerint csökkenő sorrenben
@@ -16,7 +16,8 @@ Annak ellenőzése, hogy a webalkalmazás megfelelően elérhető-e a megadott i
 |:---|:---|:---|
 | Kritikus hiba  | Az adott funkció hibája a teljes Webszolgáltatás leállást okozza | 0 |
 | Hibás működés | Az adott tesztesetben nem a várt működést tapasztaltuk | 1 |
-| Elfogadva | Az elvárt működés szerint működött a tesztelt komponens | 15 |
+| Esztétikai hiba | Az adott teszeset a vártaknak megfelelően lefutott funkcionálisan de a megjelenítés az nem a vártaknak megfelelően néz ki | 1 |
+| Elfogadva | Az elvárt működés szerint működött a tesztelt komponens | 14 |
 
 ---
 
@@ -50,4 +51,16 @@ Annak ellenőzése, hogy a webalkalmazás megfelelően elérhető-e a megadott i
 | BR-13 | Bejelentezés helyes adatokkal 02 | Név és jelszó használatával is ugyanúgy el kell fogadni abban az esetben ha azok helyesek | Teszt név , FA2hh678 | Az elvárt módon sikeres bejelentkezés névvel is | Elfogadva | - |
 | BR-14 | Bejelentkezési kísérlet hibás email-el | Az oldal elutasítja a bejelentkezést és valamilyen visszajelzést ad | nemlétezőgmail@gmail.com | Az oldalon megjelent a *Hibás email cím vagy jelszó!* üzenet | Elfogadva | - |
 | BR-15 | Bejelentkezési kísérlet hibás jelszóval | Az oldal elutasítja a bejelentkezést és valamilyen visszajelzést ad | ez_egy_hibás_jelszó | Az oldalon megjelent a *Hibás email cím vagy jelszó!* üzenet | Elfogadva | - |
-| BR-16 | Belejelntkezés nélküi oldalelérés | Beírjuk "kézzel" a bejelentkezett oldalra mutató route nevét, melyre azt várjuk, hogy visszadob a bejelentkezés oldalra azzal hogy nincs hiteles bejelentkezés | http://127.0.0.1:5000/expenses | Az entert lenyomása után a bejelentkezett oldal helyett a következő szöveg jelenik meg: *Redirecting... You should be redirected automatically to the target URL: /login?msg=Nincs+bejelentkezve!. If not, click the link.* A linkre kattintás után pedig átnavigál a bejelentkezéshez a *❌ Nincs bejelentkezve!* üzenettel | Elfogadva | Javasolt rögtön a bejelentkezési oldalra navigálni a közbeeső állomás nélkül |
+| BR-16 | Belejelntkezés nélküi oldalelérés | Beírjuk "kézzel" a bejelentkezett oldalra mutató route nevét, melyre azt várjuk, hogy visszadob a bejelentkezés oldalra azzal hogy nincs hiteles bejelentkezés | http://127.0.0.1:5000/expenses | Az entert lenyomása után a bejelentkezett oldal helyett a következő szöveg jelenik meg: *Redirecting... You should be redirected automatically to the target URL: /login?msg=Nincs+bejelentkezve!. If not, click the link.* A linkre kattintás után pedig átnavigál a bejelentkezéshez a *❌ Nincs bejelentkezve!* üzenettel | Esztétikai hiba | Javasolt rögtön a bejelentkezési oldalra navigálni a közbeeső állomás nélkül |
+
+---
+---
+
+## Tesztelési konklúzió
+A vizsgált rész szerkezetileg működik egyedül a gyenge jelszó elfogadását kell letiltani, illetve a bejelentkezés nélküli esetben jó helyre kell hogy navigáljon. Minden más az elvártak szerint működik.
+
+## Javítási jegyzék
+| Tesztelés ID | Javítás állapota | Megjegyzés |
+|:---|:---|:---|
+| BR-09 | Nincs javítva | - |
+| BR-16 | Nincs javítva | - |
