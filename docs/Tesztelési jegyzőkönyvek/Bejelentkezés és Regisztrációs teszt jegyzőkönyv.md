@@ -1,4 +1,5 @@
 # Bejelentkezés és Regisztrációs teszt jegyzőkönyv
+|:---|:---|
 | Tesztelést végezte | Kis Gergely Sándor |
 | Operációs rendszer | Windows 11 |
 | Böngésző | Google Chrome |
