@@ -18,3 +18,13 @@ Az alkalmazás **mesterséges intelligenciát (Google Gemini API)** is használ,
 - **Adatbázis:** SQLite
 - **AI integráció:** Google Gemini API
 - **Adatkommunikáció:** REST API (JSON)
+
+---
+
+Készült az RFT beadandó keretében.
+
+Kis Gergő - VVZDQ
+
+Vanczák Tamás - IF175R
+
+Varga Zsófia - X49HPQ
