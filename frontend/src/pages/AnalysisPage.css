@@ -1,75 +1,86 @@
-.analysis-page{
-    padding: 30px 0;
+.analysis-page {
+    padding: 60px 20px;
     min-height: 100vh;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     align-items: center;
+    background-color: #1e3a8a;
+    background-image: radial-gradient(circle at top right, #1e40af, #1e3a8a);
+    color: #f8fafc;
+    font-family: 'Inter', sans-serif;
 }
 
-.header{
+.header {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 20px;
+    gap: 30px;
+    margin-bottom: 50px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px 30px;
+    border-radius: 50px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.header button{
-    background-color: white;
+.year-btn {
+    background-color: #ffffff;
     color: #1e3a8a;
     border: none;
-    padding: 8px 16px;
-    border-radius: 8px;
+    padding: 12px 24px;
+    border-radius: 12px;
     cursor: pointer;
-    font-weight: 500;
-    transition: background-color 0.2s ease, transform 0.2s ease;
+    font-weight: 700;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
 }
 
-.header button:hover{
+.year-btn:hover {
     background-color: #f0f4ff;
-    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
-.year-label{
-    color: white;
-    font-weight: 600;
-    font-size: 16px;
-    margin: 0 8px;
+.year-label {
+    font-size: 28px;
+    font-weight: 800;
+    min-width: 100px;
+    text-align: center;
 }
 
-.no-data{
-  text-align: center;
-  color: #ccc;
-  font-style: italic;
-  margin-top: 20px;
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 30px;
+    width: 100%;
+    max-width: 1600px;
 }
 
-.charts{
+.chart-card {
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 24px;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
     display: flex;
     flex-direction: column;
-    gap: 40px;
-    width: 100%;
-    max-width: 900px;
+    min-height: 500px; 
+    box-sizing: border-box;
 }
 
-.charts h3{
-    font-size: 18px;
-    font-weight: 600;
-    text-align: center;
-    color: white;
-    margin-bottom: 10px;
+.chart-card h3 {
+    color: #0f172a;
+    margin-top: 0;
+    margin-bottom: 30px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-align: left;
 }
 
-.charts .recharts-wrapper{
-    background-color: white;
-    padding: 10px;
-    border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-}
-
-@media (max-width: 768px){
-    .charts{
-        gap: 24px;
-    }
+.no-data, .loading-container {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    font-style: italic;
 }
