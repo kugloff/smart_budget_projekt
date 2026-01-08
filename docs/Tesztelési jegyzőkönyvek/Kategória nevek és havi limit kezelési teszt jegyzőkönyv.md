@@ -1,4 +1,4 @@
-# Bejelentkezés és Regisztrációs teszt jegyzőkönyv
+# Kategória nevek és Havi limit kezelési teszt jegyzőkönyv
 | Tulajdonság | Adat |
 |:---|:---|
 | Tesztelést végezte | Kis Gergely Sándor |

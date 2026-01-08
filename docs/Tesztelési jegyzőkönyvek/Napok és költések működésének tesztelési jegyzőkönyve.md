@@ -1,10 +1,10 @@
-# Bejelentkezés és Regisztrációs teszt jegyzőkönyv
+# Napok és Költések működésének tesztelési jegyzőkönyve
 | Tulajdonság | Adat |
 |:---|:---|
-| Tesztelést végezte |  |
-| Operációs rendszer |  |
-| Böngésző |  |
-| Dátum |  |
+| Tesztelést végezte | Kis Gergely Sándor |
+| Operációs rendszer | Windows 11 |
+| Böngésző | Google Chrome |
+| Dátum | 2026.08.08 |
 
 ---
 

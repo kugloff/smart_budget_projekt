@@ -1,4 +1,4 @@
-# Bejelentkezés és Regisztrációs teszt jegyzőkönyv
+# AI tanácsadás tesztelésének jegyzőkönyve
 | Tulajdonság | Adat |
 |:---|:---|
 | Tesztelést végezte |  |

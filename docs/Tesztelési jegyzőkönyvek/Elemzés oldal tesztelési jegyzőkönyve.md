@@ -1,4 +1,4 @@
-# Bejelentkezés és Regisztrációs teszt jegyzőkönyv
+# Elemzés oldal tesztelési jegyzőkönyve
 | Tulajdonság | Adat |
 |:---|:---|
 | Tesztelést végezte |  |
