@@ -28,13 +28,10 @@ export default function ExpensesPage() {
   const [loading, setLoading] = useState(true);
   const [monthlyLimit, setMonthlyLimit] = useState(0);
   const [categoryNames, setCategoryNames] = useState([]);
-
   const [modalConfig, setModalConfig] = useState({ isOpen: false, type: null, id: null, title: "", message: "" });
 
   const loadData = async (showLoading = true) => {
-    if (showLoading) {
-      setLoading(true);
-    }
+    if (showLoading) setLoading(true);
     try {
       const res = await fetch("/api/get_napi_koltesek");
       const rawData = await res.json();
@@ -57,126 +54,88 @@ export default function ExpensesPage() {
           total: (catData.koltesek || []).reduce((sum, e) => sum + (e.osszeg || 0), 0)
         }));
 
-        const dayTotal = categoriesArray.reduce((sum, cat) => sum + cat.total, 0);
-
         return {
           date: dateKey,
-          total: dayTotal,
+          total: categoriesArray.reduce((sum, cat) => sum + cat.total, 0),
           categories: categoriesArray,
           isOverLimit: false
         };
       });
 
-      formattedDays.sort((a, b) => new Date(a.date) - new Date(b.date));
+      const monthlyTotals = {};
+      formattedDays.forEach(day => {
+        const monthKey = day.date.substring(0, 7);
+        monthlyTotals[monthKey] = (monthlyTotals[monthKey] || 0) + day.total;
+      });
 
-      let runningTotal = 0;
       formattedDays = formattedDays.map(day => {
-          runningTotal += day.total;
-          if (currentLimit > 0 && runningTotal > currentLimit) {
-              return { ...day, isOverLimit: true };
-          }
-          return day;
+        const monthKey = day.date.substring(0, 7);
+        const monthTotal = monthlyTotals[monthKey];
+        return {
+          ...day,
+          isOverLimit: currentLimit > 0 && monthTotal > currentLimit
+        };
       });
 
       formattedDays.sort((a, b) => new Date(b.date) - new Date(a.date));
-      
       setDays(formattedDays);
 
     } catch (err) {
-      console.error("Hiba:", err);
+      console.error("Hiba az adatok betöltésekor:", err);
     } finally {
-      if (showLoading) {
-        setLoading(false);
-      }
+      if (showLoading) setLoading(false);
     }
   };
 
   const loadCategoryNames = async () => {
-      try {
-          const res = await fetch("/api/get_kategoria_nevek");
-          const data = await res.json();
-          setCategoryNames(data);
-      } catch (err) {
-          console.error("Nem sikerült betölteni a kategóriákat", err);
-      }
+    try {
+      const res = await fetch("/api/get_kategoria_nevek");
+      const data = await res.json();
+      setCategoryNames(data);
+    } catch (err) {
+      console.error("Nem sikerült betölteni a kategóriákat", err);
+    }
+  };
+
+  const fetchLimit = async () => {
+    try {
+      const res = await fetch("/api/get_user_limit");
+      const data = await res.json();
+      if (data.limit !== undefined) setMonthlyLimit(data.limit);
+    } catch (err) {
+      console.error("Hiba a limit betöltésekor:", err);
+    }
   };
 
   useEffect(() => {
     loadData(true);
     loadCategoryNames();
+    fetchLimit();
   }, []);
 
-      const fetchLimit = async () => {
-          try {
-              const res = await fetch("/api/get_user_limit");
-              const data = await res.json();
-              if (data.limit !== undefined) {
-                  setMonthlyLimit(data.limit); 
-              }
-          } catch (err) {
-              console.error("Hiba a limit betöltésekor:", err);
-          }
-      };
-
-    useEffect(() => {
-        loadData(true);
-        loadCategoryNames();
-        fetchLimit(); 
-    }, []);
-
-    
   const initiateDelete = (type, id, name) => {
-    if (type === 'day') {
-      setModalConfig({
-        isOpen: true, type: 'day', id: id, title: "Nap törlése",
-        message: `Biztosan törölni szeretnéd a(z) ${id} napot? Minden adat elvész!`
-      });
-    } else if (type === 'entry') {
-      setModalConfig({
-        isOpen: true, type: 'entry', id: id, title: "Tétel törlése",
-        message: `Törlöd ezt a tételt: "${name}"?`
-      });
-    } else if (type === 'category') {
-        setModalConfig({
-            isOpen: true, type: 'category', id: id, title: "Kategória törlése",
-            message: `Törlöd a(z) "${name}" kategóriát erről a napról? A tételek is törlődnek!`
-          });
-    }
+    setModalConfig({
+      isOpen: true,
+      type: type,
+      id: id,
+      title: type === 'day' ? "Nap törlése" : type === 'entry' ? "Tétel törlése" : "Kategória törlése",
+      message: type === 'day' ? `Törlöd a(z) ${id} napot?` : `Törlöd: "${name}"?`
+    });
   };
 
   const handleConfirmDelete = async () => {
     const { type, id } = modalConfig;
-    let url = "";
+    const urls = { day: "/api/delete_napi_koltes", category: "/api/delete_koltesi_kategoria", entry: "/api/delete_koltes" };
     
-    if (type === 'day') {
-        url = "/api/delete_napi_koltes";
-    } else if (type === 'category') {
-        url = "/api/delete_koltesi_kategoria";
-    } else if (type === 'entry') {
-        url = "/api/delete_koltes";
-    }
-
-    if (!url) {
-        setModalConfig({ ...modalConfig, isOpen: false });
-        return;
-    }
-
     try {
-      const res = await fetch(url, {
+      const res = await fetch(urls[type], {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: id })
       });
-      
-      if (res.ok) {
-        await loadData(false); 
-      } else {
-        const err = await res.json();
-        alert(err.info || "Hiba történt a törlés során!");
-      }
+      if (res.ok) await loadData(false);
     } catch (err) {
       console.error("Hiba:", err);
-      alert("Hálózati hiba!");
     } finally {
       setModalConfig({ ...modalConfig, isOpen: false });
     }
@@ -186,7 +145,7 @@ export default function ExpensesPage() {
     <div className="expenses-view-container">
       <div className="expenses-container">
         <div style={{ marginBottom: "20px", padding: "16px", background: "white", borderRadius: "16px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
-           <h2 style={{margin: 0, color: "#1e3a8a"}}>Havi keret: {monthlyLimit.toLocaleString()} Ft</h2>
+           <h2 style={{margin: 0, color: "#1e3a8a"}}>Havi költési limit: {monthlyLimit.toLocaleString()} Ft</h2>
         </div>
 
         {loading ? <p>Betöltés...</p> : (
@@ -220,112 +179,41 @@ export default function ExpensesPage() {
 const DayCard = ({ day, categoryNames, onDelete, onDeleteEntry, onDeleteCategory, onRefresh }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  
   const [localCategories, setLocalCategories] = useState([]);
 
   useEffect(() => {
     setLocalCategories(day.categories);
   }, [day.categories]);
 
-  const handleStartEdit = (e) => {
-    e.stopPropagation();
-    setIsOpen(true);
-    setIsEditing(true);
-  };
-
   const handleSave = async (e) => {
     e.stopPropagation();
     const promises = [];
-
-    for (const cat of localCategories) {
-      for (const entry of cat.entries) {
-        const hasContent = (entry.description && entry.description.trim() !== "") || (entry.amount && Number(entry.amount) > 0);
-        
+    localCategories.forEach(cat => {
+      cat.entries.forEach(entry => {
+        const hasContent = (entry.description?.trim() !== "") || (Number(entry.amount) > 0);
         if (!entry.id || entry.id.toString().startsWith('temp')) {
           if (hasContent) {
-            promises.push(
-              fetch("/api/add_koltes", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  koltes_id: cat.id,
-                  leiras: entry.description,
-                  osszeg: Number(entry.amount)
-                })
-              })
-            );
-          }
-        } 
-        else {
-          promises.push(
-            fetch("/api/edit_koltes", {
-              method: "PUT",
+            promises.push(fetch("/api/add_koltes", {
+              method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                id: entry.id,
-                leiras: entry.description,
-                osszeg: Number(entry.amount)
-              })
-            })
-          );
+              body: JSON.stringify({ koltes_id: cat.id, leiras: entry.description, osszeg: Number(entry.amount) })
+            }));
+          }
+        } else {
+          promises.push(fetch("/api/edit_koltes", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: entry.id, leiras: entry.description, osszeg: Number(entry.amount) })
+          }));
         }
-      }
-    }
+      });
+    });
 
     try {
-      const results = await Promise.all(promises);
-      const allOk = results.every(r => r.ok);
-      
-      if (allOk) {
-        setIsEditing(false);
-        await onRefresh(false);
-      } else {
-        alert("Néhány tételt nem sikerült menteni!");
-      }
-    } catch (error) {
-      console.error("Hiba a mentésnél:", error);
-      alert("Hálózati hiba történt a mentéskor.");
-    }
-  };
-
-  const handleCancel = (e) => {
-    e.stopPropagation();
-    setLocalCategories(day.categories);
-    setIsEditing(false);
-  };
-
-  const handleEntryChange = (catIndex, entryIndex, field, value) => {
-    const newCats = [...localCategories];
-    newCats[catIndex].entries[entryIndex][field] = value;
-    setLocalCategories(newCats);
-  };
-
-  const handleAddEntry = (catIndex) => {
-    const newCats = [...localCategories];
-    newCats[catIndex].entries.push({ 
-        id: `temp-${Date.now()}`, 
-        description: "", 
-        amount: "" 
-    });
-    setLocalCategories(newCats);
-  };
-
-  const handleAddCategory = async (kategoria_nev_id) => {
-      try {
-        const res = await fetch("/api/add_koltesi_kategoria", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ datum: day.date, kategoria_id: kategoria_nev_id })
-        });
-        const result = await res.json();
-        
-        if (!result.error) {
-            // MÓDOSÍTVA: false paraméter, hogy ne záródjon be
-            await onRefresh(false); 
-        } else {
-            alert(result.info);
-        }
-      } catch (e) { console.error(e); }
+      await Promise.all(promises);
+      setIsEditing(false);
+      await onRefresh(false);
+    } catch (e) { console.error(e); }
   };
 
   return (
@@ -333,47 +221,44 @@ const DayCard = ({ day, categoryNames, onDelete, onDeleteEntry, onDeleteCategory
       <div className="day-header">
         <div className="day-info" onClick={() => setIsOpen(!isOpen)} style={{cursor: "pointer", flex: 1}}>
           <strong>{day.date?.replace(/-/g, ".") + "."}</strong>
-          
           <div className="day-category-dots">
-            {day.categories.map((cat, i) => {
-               const dotColor = cat.color && cat.color.startsWith('#') ? cat.color : `#${cat.color || 'ccc'}`;
-               return (
-                 <span
-                   key={i}
-                   className="small-dot"
-                   style={{ backgroundColor: dotColor }}
-                   title={`${cat.name}: ${cat.total.toLocaleString()} Ft`}
-                 />
-               );
-            })}
+            {day.categories.map((cat, i) => (
+              <span key={i} className="small-dot" style={{ backgroundColor: cat.color?.startsWith('#') ? cat.color : `#${cat.color || 'ccc'}` }} title={`${cat.name}: ${cat.total.toLocaleString()} Ft`} />
+            ))}
           </div>
         </div>
 
         <div className="day-actions-total">
-          <div className="day-total">
+            {day.isOverLimit && (
+              <span style={{ 
+                color: "#ef4444", 
+                fontSize: "0.7rem", 
+                fontWeight: "700", 
+                marginRight: "10px",
+                textTransform: "uppercase",
+                backgroundColor: "#fee2e2",
+                padding: "2px 8px",
+                borderRadius: "4px",
+                border: "1px solid #fecaca"
+              }}>
+                Havi limit túllépve
+              </span>
+            )}
+
+          <div className="day-total" style={{ color: day.isOverLimit ? "#ef4444" : "inherit", fontWeight: day.isOverLimit ? "700" : "500" }}>
             {day.total.toLocaleString()} Ft
           </div>
           
           {isEditing ? (
             <>
-                <button className="icon-btn" onClick={handleSave} title="Mentés">
-                    <Save size={20} color="#16a34a" />
-                </button>
-                <button className="icon-btn" onClick={handleCancel} title="Mégse">
-                    <X size={20} color="#dc2626" />
-                </button>
+              <button className="icon-btn" onClick={handleSave}><Save size={20} color="#16a34a" /></button>
+              <button className="icon-btn" onClick={(e) => { e.stopPropagation(); setIsEditing(false); }}><X size={20} color="#dc2626" /></button>
             </>
           ) : (
             <>
-                <button className="icon-btn" onClick={handleStartEdit} title="Szerkesztés">
-                    <Edit2 size={18} />
-                </button>
-                <button className="icon-btn" onClick={onDelete} title="Nap törlése">
-                    <Trash2 size={18} />
-                </button>
-                <button className="icon-btn" onClick={() => setIsOpen(!isOpen)}>
-                    {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                </button>
+              <button className="icon-btn" onClick={(e) => { e.stopPropagation(); setIsEditing(true); setIsOpen(true); }}><Edit2 size={18} /></button>
+              <button className="icon-btn" onClick={(e) => { e.stopPropagation(); onDelete(); }}><Trash2 size={18} /></button>
+              <button className="icon-btn" onClick={() => setIsOpen(!isOpen)}>{isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}</button>
             </>
           )}
         </div>
@@ -386,25 +271,32 @@ const DayCard = ({ day, categoryNames, onDelete, onDeleteEntry, onDeleteCategory
                 key={cat.id || catIndex} 
                 category={cat} 
                 isEditing={isEditing}
-                onEntryChange={(entryIndex, field, val) => handleEntryChange(catIndex, entryIndex, field, val)}
-                onAddEntry={() => handleAddEntry(catIndex)}
+                onEntryChange={(entryIndex, field, val) => {
+                  const newCats = [...localCategories];
+                  newCats[catIndex].entries[entryIndex][field] = val;
+                  setLocalCategories(newCats);
+                }}
+                onAddEntry={() => {
+                  const newCats = [...localCategories];
+                  newCats[catIndex].entries.push({ id: `temp-${Date.now()}`, description: "", amount: "" });
+                  setLocalCategories(newCats);
+                }}
                 onDeleteEntry={onDeleteEntry}
                 onDeleteCategory={() => onDeleteCategory('category', cat.id, cat.name)}
             />
           ))}
-
           {isEditing && (
-             <div className="add-category-section" style={{marginTop: "10px", textAlign: "center"}}>
-                 <select 
-                    className="category-select" 
-                    onChange={(e) => handleAddCategory(e.target.value)}
-                    value=""
-                    style={{width: "100%", padding: "8px"}}
-                 >
+             <div className="add-category-section" style={{marginTop: "10px"}}>
+                 <select className="category-select" style={{width: "100%", padding: "8px"}} onChange={async (e) => {
+                    await fetch("/api/add_koltesi_kategoria", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ datum: day.date, kategoria_id: e.target.value })
+                    });
+                    await onRefresh(false);
+                 }} value="">
                      <option value="" disabled>+ Új kategória hozzáadása...</option>
-                     {categoryNames.map(cn => (
-                         <option key={cn[0]} value={cn[0]}>{cn[1]}</option>
-                     ))}
+                     {categoryNames.map(cn => <option key={cn[0]} value={cn[0]}>{cn[1]}</option>)}
                  </select>
              </div>
           )}
@@ -415,8 +307,7 @@ const DayCard = ({ day, categoryNames, onDelete, onDeleteEntry, onDeleteCategory
 };
 
 const CategoryCard = ({ category, isEditing, onEntryChange, onAddEntry, onDeleteEntry, onDeleteCategory }) => {
-  const color = category.color && category.color.startsWith('#') ? category.color : `#${category.color || 'ccc'}`;
-
+  const color = category.color?.startsWith('#') ? category.color : `#${category.color || 'ccc'}`;
   return (
     <div className="category-card" style={{borderColor: color}}>
       <div className="category-header">
@@ -424,37 +315,16 @@ const CategoryCard = ({ category, isEditing, onEntryChange, onAddEntry, onDelete
           <span className="color-dot" style={{ backgroundColor: color }}></span>
           <span className="category-name">{category.name}</span>
         </div>
-        
         <div style={{display: "flex", alignItems: "center"}}>
-            <div className="category-total" style={{marginRight: isEditing ? "10px" : "0"}}>
-                {category.total.toLocaleString()} Ft
-            </div>
-            {isEditing && (
-                <button className="icon-btn" onClick={onDeleteCategory} title="Kategória törlése" style={{color: "#dc2626"}}>
-                    <Trash2 size={16} />
-                </button>
-            )}
+            <div className="category-total">{category.total.toLocaleString()} Ft</div>
+            {isEditing && <button className="icon-btn" onClick={onDeleteCategory} style={{color: "#dc2626", marginLeft: "8px"}}><Trash2 size={16} /></button>}
         </div>
       </div>
-
       <div className="category-entries">
-        {category.entries.length === 0 && !isEditing && <small style={{color: "#888", fontStyle: "italic"}}>Nincsenek tételek</small>}
-        
-        {category.entries.map((entry, entryIndex) => (
-          <EntryRow 
-            key={entry.id || entryIndex} 
-            entry={entry} 
-            isEditing={isEditing}
-            onChange={(field, val) => onEntryChange(entryIndex, field, val)}
-            onDelete={() => onDeleteEntry('entry', entry.id, entry.description)}
-          />
+        {category.entries.map((entry, idx) => (
+          <EntryRow key={entry.id || idx} entry={entry} isEditing={isEditing} onChange={(f, v) => onEntryChange(idx, f, v)} onDelete={() => onDeleteEntry('entry', entry.id, entry.description)} />
         ))}
-
-        {isEditing && (
-            <button className="add-entry-btn" onClick={onAddEntry} style={{width: "100%"}}>
-                <Plus size={14} /> Új tétel
-            </button>
-        )}
+        {isEditing && <button className="add-entry-btn" onClick={onAddEntry} style={{width: "100%"}}><Plus size={14} /> Új tétel</button>}
       </div>
     </div>
   );
@@ -462,29 +332,14 @@ const CategoryCard = ({ category, isEditing, onEntryChange, onAddEntry, onDelete
 
 const EntryRow = ({ entry, isEditing, onChange, onDelete }) => {
   if (isEditing) {
-      return (
-        <div className="entry-item-container" style={{backgroundColor: "#fff"}}>
-            <input 
-                type="text" 
-                className="entry-description-input"
-                placeholder="Tétel neve"
-                value={entry.description} 
-                onChange={(e) => onChange('description', e.target.value)} 
-            />
-            <input 
-                type="number" 
-                className="entry-amount-input"
-                placeholder="0"
-                value={entry.amount} 
-                onChange={(e) => onChange('amount', e.target.value)} 
-            />
-            <button className="delete-entry-btn" onClick={onDelete} title="Törlés">
-                <Trash2 size={16} color="#dc2626"/>
-            </button>
-        </div>
-      );
+    return (
+      <div className="entry-item-container" style={{display: "flex", gap: "5px", marginBottom: "5px"}}>
+        <input type="text" className="entry-description-input" style={{flex: 2}} placeholder="Leírás" value={entry.description} onChange={(e) => onChange('description', e.target.value)} />
+        <input type="number" className="entry-amount-input" style={{flex: 1}} placeholder="Ft" value={entry.amount} onChange={(e) => onChange('amount', e.target.value)} />
+        <button className="icon-btn" onClick={onDelete}><Trash2 size={16} color="#dc2626"/></button>
+      </div>
+    );
   }
-
   return (
     <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.9em", padding: "4px 0", borderBottom: "1px solid #eee" }}>
       <span>{entry.description || "Nincs leírás"}</span>
