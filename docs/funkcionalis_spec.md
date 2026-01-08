@@ -55,6 +55,78 @@ A rendszer folyamatait az alábbi diagram szemlélteti, a kezdőponttól (Start)
 
 ---
 
+## 2.1.6 Képernyőtervek
+
+A képernyőtervek a felhasználói felület logikai felépítését és az egyes modulok elhelyezkedését szemléltetik, biztosítva a reszponzív működést asztali és mobil környezetben egyaránt.
+
+### 2.1.6.1 DESKTOP nézet
+
+#### DESKTOP Startup (Hitelesítés)
+Ezen a felületen történik a rendszerbe való belépés vagy az új profil létrehozása.
+- **User Registration:** Regisztrációs űrlap (felhasználónév, jelszó).
+- **User Login:** Bejelentkezési felület meglévő adatokkal.
+
+![image](./pics/SU_DESKTOP_wireframe.png)
+
+#### DESKTOP Főoldal (Kiadások és Kezelés)
+A központi interfész, amely a **Main Menu** funkcióit integrálja.
+- **Category Management:** Új kategória hozzáadása, szerkesztése vagy törlése.
+- **Day Management:** Napok kezelése és kiválasztása.
+- **Day Entry Management:** Tranzakciók (összeg, leírás) rögzítése és módosítása.
+- **Havi limit**
+
+![image](./pics/1_DESKTOP_kiadasok_wireframe.png)
+
+#### DESKTOP Elemzés oldal (Analysis)
+- **Select Data for Diagrams:** Éves szűrés kiadásokra és kategóriás lebontás
+- **Vizuális megjelenítés:** Interaktív oszlop- és kördiagramok a kiadások megoszlásáról.
+
+![image](./pics/2_DESKTOP_elemzes_wireframe.png)
+
+#### DESKTOP AI Tanácsadó (Google Gemini AI)
+- **Send Data to AI:** Gomb az adatok elemzésre küldéshez.
+- **Személyre szabott riport:** A **Google Gemini AI** által generált szöveges elemzés és megtakarítási javaslatok.
+
+![image](./pics/3_DESKTOP_AI_wireframe.png)
+
+---
+
+### 2.1.6.2 MOBIL nézet
+
+A mobil nézet követi a desktop funkcióit, de függőleges elrendezéssel és egyszerűsített navigációval segíti a gyors adatbevitelt.
+
+#### MOBIL Startup
+- Kompakt bejelentkezési és regisztrációs felület.
+
+![image](./pics/SU_MOBIL_wireframe.png)
+
+#### MOBIL Navigációs menü
+- Oldalsó vagy alsó menüsor a gyors váltáshoz: *Kiadások, Elemzés, Gemini AI, Havi limit.*
+
+![image](./pics/M_MOBIL_menu_wireframe.png)
+
+#### MOBIL Kiadások (Tranzakció rögzítés)
+- Gyors beviteli mezők az **Add Entry** funkcióhoz, kategóriaválasztó legördülő menüvel.
+
+![image](./pics/1_MOBIL_kiadasok_wireframe.png)
+
+#### MOBIL Elemzés és Statisztika
+- Görgethető grafikonok és összefoglaló adatok a havi költésekről.
+
+![image](./pics/2_MOBIL_elemzes_wireframe.png)
+
+#### MOBIL AI Asszisztens (Gemini AI)
+- Chat-szerű vagy kártya alapú felület a mesterséges intelligencia válaszaihoz.
+
+![image](./pics/3_MOBIL_AI_wireframe.png)
+
+#### MOBIL Beállítások és Limit
+- Havi költési korlát beállítása a navigációs menüből elérhető külön képernyőn.
+
+![image](./pics/O_MOBIL_limit_wireframe.png)
+
+---
+
 ### Forgatókönyv példa
 
 **Forgatókönyv neve:** Regisztráció és első AI elemzés kérése
