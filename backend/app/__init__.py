@@ -449,8 +449,17 @@ def create_app():
     def analysis_category(year):
         if (x := is_logged()) != True: return x
 
-        return jsonify([{"category": r[0], "value": r[1]} for r in db.SELECT_elemzes_kategoria_lebontas(session['user_id'], str(year))])
+        eredmeny = db.SELECT_elemzes_kategoria_lebontas(session['user_id'], str(year))
+        
+        visszaadott_adat = []
+        for r in eredmeny:
+            visszaadott_adat.append({
+                "category": r[0],
+                "value": r[1],
+                "szin_kod": f"#{r[2]}" if r[2] and not str(r[2]).startswith('#') else r[2]
+            })
 
+        return jsonify(visszaadott_adat)
     @app.route('/ai')
     def ai():
         if (x := is_logged()) != True: return x

@@ -1,6 +1,7 @@
 # Backend virtual environment
 backend/.venv/
 backend/.env
+backend/.idea
 
 # Python cache
 backend/__pycache__/
