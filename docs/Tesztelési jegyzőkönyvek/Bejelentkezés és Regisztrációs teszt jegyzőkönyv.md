@@ -1,9 +1,9 @@
 # Bejelentkezés és Regisztrációs teszt jegyzőkönyv
-Tesztelést végezte: 	Kis Gergely Sándor
-Operációs rendszer:		Windows 11 
-Böngésző: 				Google Chrome
-Dátum: 					2026.08.08  
-Talált hibák száma: 	2  
+Tesztelést végezte: 	Kis Gergely Sándor  
+Operációs rendszer:		Windows 11   
+Böngésző: 				Google Chrome  
+Dátum: 					2026.08.08    
+Talált hibák száma: 	-  
 
 ---
 
@@ -22,9 +22,3 @@ Annak ellenőzése, hogy a webalkalmazás megfelelően elérhető-e a megadott i
 
 ---
 
-## Regisztrációs felület működése
-| Tesztelés ID | Teszt neve | Elvárt működés | Bemeneti adat | Tapasztalt működés | Ítélet | Megjegyzés / Javaslat |
-|:---|:---|:---|:---|:---|:---|:---|
-| T-05 |  |  |  |  |  |  |
-| T-01 |  |  |  |  |  |  |
-| T-01 |  |  |  |  |  |  |
