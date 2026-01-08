@@ -106,6 +106,25 @@ export default function ExpensesPage() {
     loadCategoryNames();
   }, []);
 
+      const fetchLimit = async () => {
+          try {
+              const res = await fetch("/api/get_user_limit");
+              const data = await res.json();
+              if (data.limit !== undefined) {
+                  setMonthlyLimit(data.limit); 
+              }
+          } catch (err) {
+              console.error("Hiba a limit betöltésekor:", err);
+          }
+      };
+
+    useEffect(() => {
+        loadData(true);
+        loadCategoryNames();
+        fetchLimit(); 
+    }, []);
+
+    
   const initiateDelete = (type, id, name) => {
     if (type === 'day') {
       setModalConfig({

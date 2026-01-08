@@ -535,7 +535,7 @@ def create_app():
         user_id = session.get('user_id')
 
         try:
-            db.execute("UPDATE felhasznalok SET havi_limit = ? WHERE id = ?", (uj_limit, user_id))
+            db.execute("UPDATE felhasznalok SET koltesi_limit = ? WHERE user_id = ?", (uj_limit, user_id))
             
             return jsonify({"error": False, "info": "Sikeres mentés!"})
             
@@ -546,14 +546,17 @@ def create_app():
     @app.route("/api/get_user_limit", methods=["GET"])
     def get_user_limit():
         if (x := is_logged()) != True: return x
-        
+    
         user_id = session.get('user_id')
-        
+    
         try:
-            user_data = db.select_felhasznalo(2, user_id) 
+            user_data = db.select_felhasznalo(0, user_id) 
             
-            havi_limit = user_data[0][4] if user_data and len(user_data[0]) > 4 else 0
+            havi_limit = user_data[0][3] if user_data and len(user_data[0]) > 3 else 0
             
+            if havi_limit is None:
+                havi_limit = 0
+                
             return jsonify({"limit": havi_limit})
         except Exception as e:
             print(f"HIBA A LIMIT LEKÉRÉSNÉL: {e}")

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Navbar.css';
 import { LimitModal } from '../Modals/LimitModal/LimitModal';
 import { CategoryManagerModal } from '../Modals/CategoryManagerModal/CategoryManagerModal';
@@ -6,14 +6,54 @@ import { CategoryManagerModal } from '../Modals/CategoryManagerModal/CategoryMan
 export const Navbar = ({ onOpenAddDayModal }) => {
   const [isLimitModalOpen, setIsLimitModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
-  const [limit, setLimit] = useState(-1); // alapérték (-1 → nincs limit)
+  const [limit, setLimit] = useState(0);
 
   const currentPage = window.REACT_PAGE || 'login';
   const isLoggingIn = currentPage === 'login';
 
-  // le kell kérni a bejelentkezett felhasználó aktuális havi limitjét
-  // kategóriákat
-  // a kategóriákat viszont a categoryManagerModal-ban kell majd változtatni
+  const fetchLimit = async () => {
+    try {
+      const res = await fetch("/api/get_user_limit");
+      const data = await res.json();
+      if (data.limit !== undefined) {
+        setLimit(data.limit);
+      }
+    } catch (err) {
+      console.error("Hiba a limit lekérésekor:", err);
+    }
+  };
+
+const handleSaveLimit = async () => {
+  const numericLimit = parseInt(limit, 10);
+  
+  if (isNaN(numericLimit)) {
+    alert("Kérlek érvényes számot adj meg!");
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/set_user_limit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ limit: numericLimit })
+    });
+    
+    const data = await res.json();
+    if (!data.error) {
+      setIsLimitModalOpen(false);
+      await fetchLimit(); 
+      window.location.reload(); 
+    }
+  } catch (err) {
+    console.error("Hiba:", err);
+  }
+};
+
+  useEffect(() => {
+    if (!isLoggingIn) {
+      fetchLimit();
+    }
+  }, [isLoggingIn]);
 
   return (
     <nav className="container">
@@ -27,7 +67,7 @@ export const Navbar = ({ onOpenAddDayModal }) => {
           </li>
           {currentPage === 'expenses' && (
             <li className="limit-button" onClick={() => setIsLimitModalOpen(true)}>
-              Költési limit beállítása {/* limit lekérése */}
+              Költési limit: {limit > 0 ? `${limit.toLocaleString()} Ft` : "Nincs beállítva"}
             </li>
           )}
         </ul>
@@ -52,7 +92,6 @@ export const Navbar = ({ onOpenAddDayModal }) => {
             <>
               <button onClick={onOpenAddDayModal}>Új nap hozzáadása</button>
               <button onClick={() => setIsCategoryModalOpen(true)}>Kategóriák kezelése</button>
-              {/* kategória-adatok lekérése */}
             </>
           ) : (
             <span style={{ visibility: 'hidden' }}>Placeholder</span>
@@ -72,19 +111,14 @@ export const Navbar = ({ onOpenAddDayModal }) => {
         </span>
       </div>
 
-      {/* LimitModal mentés */}
       <LimitModal
         isOpen={isLimitModalOpen}
         onClose={() => setIsLimitModalOpen(false)}
-        onSave={() => {
-          // mentés
-          setIsLimitModalOpen(false);
-        }}
+        onSave={handleSaveLimit} 
         limit={limit}
         setLimit={setLimit}
       />
 
-      {/* backend GET, POST, DELETE */}
       <CategoryManagerModal
         isOpen={isCategoryModalOpen}
         onClose={() => setIsCategoryModalOpen(false)}
