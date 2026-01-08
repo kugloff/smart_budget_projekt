@@ -45,14 +45,6 @@ def create_app():
         koltesek = db.select_koltesek(1, kategoria_id)
         return [{"leiras": z[2], "osszeg": z[3]} for z in koltesek]
 
-    def get_nap_kategoriak(nap_id: int) -> dict:
-        end = {}
-        for y in db.select_koltesi_kategoriak(0, nap_id):
-            kategoria_nevek = db.select_kategoria_nevek(0, y[2])[0]
-            end[kategoria_nevek[1]] = {"szin_kod": kategoria_nevek[2], "koltes_id": y[1],
-                                       "koltesek": get_kategoria_koltesek(y[0])}
-        return end
-
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # backend mappa
     FRONTEND_DIST = os.path.abspath(os.path.join(BASE_DIR, '../../frontend/dist'))
 
@@ -319,7 +311,7 @@ def create_app():
         
         if er == True: 
             return get_helyes_json("Nap törölve!")
-        return get_error_json("Hiba a nap törlésénél!")
+        return get_error_json(f"Hiba a nap törlésénél! {er}")
 
     @app.route("/api/delete_koltesi_kategoria", methods=["DELETE"])
     def delete_koltesi_kategoria_api():
@@ -332,7 +324,7 @@ def create_app():
         
         if er == True: 
             return get_helyes_json("Kategória törölve!")
-        return get_error_json("Hiba a kategória törlésénél!")
+        return get_error_json(f"Hiba a kategória törlésénél!  {er}")
 
     @app.route("/api/delete_koltes", methods=["DELETE"])
     def delete_koltes_api():
@@ -345,7 +337,7 @@ def create_app():
         
         if er == True: 
             return get_helyes_json("Tétel törölve!")
-        return get_error_json("Hiba a tétel törlésénél!")
+        return get_error_json(f"Hiba a tétel törlésénél! {er}")
 
     @app.route("/api/edit_koltes", methods=["PUT"])
     def edit_koltes():
@@ -407,7 +399,7 @@ def create_app():
         else: return get_error_json("Hiányzó mező: nev vagy szin_kod kötül valamelyik.")
 
 
-        if (x := db.edit_kategoria_nev((modositando_mezo[0], ), (modositando_mezo[1], ), (0, 3), (data["id"], session['user_id'])))  == True:
+        if (x := db.edit_kategoria_nev((modositando_mezo[0], ), (modositando_mezo[1], ), (0, 3), (data["id"], session['user_id']))) == True:
             return get_helyes_json()
         else:
             return get_error_json(str(x), 409)
@@ -427,9 +419,6 @@ def create_app():
             return get_helyes_json()
         else:
             return get_error_json(str(x), 409)
-
-    
-
 
     # analysis
     @app.route('/analysis')
