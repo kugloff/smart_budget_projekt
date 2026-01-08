@@ -1,4 +1,5 @@
 # Bejelentkezés és Regisztrációs teszt jegyzőkönyv
+| Tulajdonság | |
 |:---|:---|
 | Tesztelést végezte | Kis Gergely Sándor |
 | Operációs rendszer | Windows 11 |
