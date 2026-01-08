@@ -376,7 +376,8 @@ def create_app():
             return get_error_json("Hiányzó mezők: nev és szin_kod szükséges!")
 
         nev = data["nev"]
-        szin_kod = data["szin_kod"][1:] # #FFFFFF - formában jön az adat
+        szin_kod = data["szin_kod"]
+
         if (x := db.add_kategoria_nev(nev, szin_kod, session['user_id'])) == True:
             return get_helyes_json()
         else:
