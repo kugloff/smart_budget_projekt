@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
-import { Sparkles, BarChart3, Calendar, Bot, Loader2 } from "lucide-react";
+import { BarChart3, Calendar, Bot, Loader2 } from "lucide-react";
 import "./AIAssistantPage.css";
 
 export default function AIAssistantPage() {
@@ -18,16 +18,11 @@ export default function AIAssistantPage() {
         console.error('Hiba a felhasználói adatok betöltésekor', err);
       }
     };
-
     fetchUserData();
   }, []);
 
   const callAI = async (mode) => {
-    if (!userData) {
-      setResponse('Felhasználói adatok még nem töltődtek be.');
-      return;
-    }
-
+    if (!userData) return;
     setLoading(true);
     setResponse("");
 
@@ -37,13 +32,11 @@ export default function AIAssistantPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mode, userData }),
       });
-
       const data = await res.json();
       setResponse(data.result || data.info || "Sajnos nem érkezett válasz az AI-tól.");
     } catch (err) {
       setResponse("Hálózati hiba történt az elemzés során.");
     }
-
     setLoading(false);
   };
 
@@ -58,7 +51,7 @@ export default function AIAssistantPage() {
               disabled={loading || !userData}
             >
               <BarChart3 size={20} />
-              {loading && userData ? "Elemzés..." : "Teljes elemzés"}
+              {loading ? "Elemzés..." : "Teljes elemzés"}
             </button>
 
             <button
@@ -67,29 +60,30 @@ export default function AIAssistantPage() {
               disabled={loading || !userData}
             >
               <Calendar size={20} />
-              {loading && userData ? "Elemzés..." : "Idei év áttekintése"}
+              {loading ? "Elemzés..." : "Idei év áttekintése"}
             </button>
           </div>
 
-          {/* Válasz doboz */}
-          <div className="response-container">
-            {loading ? (
-              <div className="loading-state">
-                <Loader2 className="spinner" />
-                <p>A Gemini AI gondolkodik...</p>
-              </div>
-            ) : response ? (
-              <div className="markdown-content">
-                <ReactMarkdown>{response}</ReactMarkdown>
-              </div>
-            ) : (
-              <div className="loading-state" style={{ opacity: 0.5 }}>
-                <Bot size={48} style={{ marginBottom: 15 }} />
-                <p>{!userData ? "Adatok betöltése..." : "Válassz egy gombot az indításhoz!"}</p>
-              </div>
-            )}
-          </div>
+          {(loading || response) && (
+            <div className="response-container animate-fade-in">
+              {loading ? (
+                <div className="loading-state">
+                  <Loader2 className="spinner" />
+                  <p>A Gemini AI gondolkodik...</p>
+                </div>
+              ) : (
+                <div className="markdown-content">
+                  <ReactMarkdown>{response}</ReactMarkdown>
+                </div>
+              )}
+            </div>
+          )}
 
+          {!loading && !response && (
+            <p className="hint-text">
+              <Bot size={16} /> {!userData ? "Adatok betöltése..." : "Válassz egy elemzési módot!"}
+            </p>
+          )}
         </div>
       </div>
     </div>
