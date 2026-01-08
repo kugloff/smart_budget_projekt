@@ -114,11 +114,11 @@ def create_app():
             # --- JSON vagy form POST kezelése ---
             if request.is_json:
                 data = request.get_json()
-                name = data.get('name', '')
+                name = data.get('name', '').upper()
                 email = data.get('email', '').strip().lower()
                 jelszo = data.get('password', '')
             else:
-                name = request.form.get('name', '')
+                name = request.form.get('name', '').upper()
                 email = request.form.get('email', '').strip().lower()
                 jelszo = request.form.get('jelszo', '')
 
@@ -134,10 +134,9 @@ def create_app():
             if foglalt_email:
                 return jsonify({"success": False, "message": "A megadott email már foglalt!"}), 401
 
-           # Felhasználó hozzáadása után le kell kérnünk az új ID-t
-            uj_felhasznalo_id = db.add_felhasznalo(name, email, generate_password_hash(jelszo))
+            db.add_felhasznalo(name, email, generate_password_hash(jelszo))
             session.clear()
-            # Itt ne a 'name'-et, hanem az ID-t mentsük el!
+
             session['user_id'] = name
             session['user_email'] = email
             return jsonify({"success": True, "message": "Sikeres regisztráció!"}), 200
