@@ -39,6 +39,15 @@ Annak ellenőrzése, hogy a kategória nevek kezelése és a havi költési limi
 | KH-08 | Létrehozott kategória módosítása 01 | Már létrehozott kategória szine és neve szabadon átírható és mentés gomb megnyomása után mentésre kerül | *egy már létrehozott k. név* | A mentésgomb megnyomása után a szerkeztések sikeresen mentésre kerülnek és erről üzenet is megjelenik | Elfogadva | - |
 | KH-09 | Létrehozott kategória módosítása 02 | Ha olyan k. nevet módosítunk ami már használva van akkor a változtatás kihatással van rá | *Régi szín -> Új szín* | A módosítás után az oldalon a régi szín marad, visztnt az oldal újratöltésével megjelenik a helyes | Esztétikai hiba | Az oldal változtatás esetén autómatiksuan frissülnie kellene |
 | KH-10 | Kategória hozzáadás már létező névvel | Minden névnek egyedinek kell lennie, vagyis az egyező nevet az oldal elutasítja | név1 , név1 | Az oldal elutasítja az egyezőséget viszont a hibaüzenet formátuma nem megfelelő *API hiba (409): { "error": true, "info": "UNIQUE constraint failed: Kategoria_nevek.nev, Kategoria_nevek.tulajdonos" }* | Esztétikai hiba | Kezelt hiba kiírás megjelenítése |
-| KH-11 |  |  |  |  |  |  |
-| KH-12 |  |  |  |  |  |  |
-| KH-13 |  |  |  |  |  |  |
+
+
+## Tesztelési konklúzió
+Funkcionálisan használható, a KH-04 hibás működödés javítása erősen javasolt az oldal többi részére való lehetséges kihatása miatt. Az esztétikai hiba javítás pedig a felhasználói élményt tudja javítani.
+
+## Javítási jegyzék
+| Tesztelés ID | Javítás állapota | Megjegyzés |
+|:---|:---|:---|
+| KH-04 | Nincs javítva | - |
+| KH-05 | Nincs javítva | - |
+| KH-09 | Nincs javítva | - |
+| KH-10 | Nincs javítva | - |
