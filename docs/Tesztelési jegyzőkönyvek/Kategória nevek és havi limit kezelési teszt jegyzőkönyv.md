@@ -17,7 +17,7 @@ Annak ellenőrzése, hogy a kategória nevek kezelése és a havi költési limi
 | Kritikus hiba  | Az adott funkció hibája a teljes Webszolgáltatás leállást okozza | 0 |
 | Hibás működés | Az adott tesztesetben nem a várt működést tapasztaltuk | 1 |
 | Esztétikai hiba | Az adott teszeset a vártaknak megfelelően lefutott funkcionálisan de a megjelenítés az nem a vártaknak megfelelően néz ki | 3 |
-| Elfogadva | Az elvárt működés szerint működött a tesztelt komponens |  |
+| Elfogadva | Az elvárt működés szerint működött a tesztelt komponens | 6 |
 
 ---
 
@@ -40,6 +40,9 @@ Annak ellenőrzése, hogy a kategória nevek kezelése és a havi költési limi
 | KH-09 | Létrehozott kategória módosítása 02 | Ha olyan k. nevet módosítunk ami már használva van akkor a változtatás kihatással van rá | *Régi szín -> Új szín* | A módosítás után az oldalon a régi szín marad, visztnt az oldal újratöltésével megjelenik a helyes | Esztétikai hiba | Az oldal változtatás esetén autómatiksuan frissülnie kellene |
 | KH-10 | Kategória hozzáadás már létező névvel | Minden névnek egyedinek kell lennie, vagyis az egyező nevet az oldal elutasítja | név1 , név1 | Az oldal elutasítja az egyezőséget viszont a hibaüzenet formátuma nem megfelelő *API hiba (409): { "error": true, "info": "UNIQUE constraint failed: Kategoria_nevek.nev, Kategoria_nevek.tulajdonos" }* | Esztétikai hiba | Kezelt hiba kiírás megjelenítése |
 
+
+---
+---
 
 ## Tesztelési konklúzió
 Funkcionálisan használható, a KH-04 hibás működödés javítása erősen javasolt az oldal többi részére való lehetséges kihatása miatt. Az esztétikai hiba javítás pedig a felhasználói élményt tudja javítani.
