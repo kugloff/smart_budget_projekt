@@ -111,6 +111,21 @@
     gap: 4px;
 }
 
+.save-btn{
+    background: #2b8a1e;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
 .delete-btn {
     background: #c0392b; /* Piros a törléshez */
 }
