@@ -24,7 +24,7 @@
 ## 
 | Tesztelés ID | Teszt neve | Elvárt működés | Bemeneti adat | Tapasztalt működés | Ítélet | Megjegyzés / Javaslat |
 |:---|:---|:---|:---|:---|:---|:---|
-| NK-01 |  |  |  |  |  |  |
+| AI-01 |  |  |  |  |  |  |
 
 
 
