@@ -36,7 +36,7 @@ A felhasználók adatbiztonságát alapvető szinten garantálni kell (pl. loká
 - **GDPR (EU 2016/679)** – személyes adatok kezelése, ha felhasználói adatok tárolása megvalósul.  
 - **ISO/IEC 9126 szabvány** – a szoftver minőségi jellemzőinek irányelvei (helyesség, használhatóság, karbantarthatóság stb.).  
 - **WCAG 2.1** – alapvető webes hozzáférhetőségi irányelvek (reszponzív megjelenés, olvashatóság).  
-- **OpenAI API használati feltételei** – mesterséges intelligencia API integráció esetén be kell tartani.  
+- **Google Generative AI Terms of Service** – a Gemini AI API használati feltételeinek betartása.  
 - **Python Flask és React keretrendszer licenszei** – nyílt forráskódú komponensek megfelelő használata.
 
 ---
@@ -57,7 +57,7 @@ A felhasználók adatbiztonságát alapvető szinten garantálni kell (pl. loká
 3. Az adatok eltárolódnak a Flask backend SQLite adatbázisában.  
 4. A rendszer valós időben frissíti a grafikonokat.  
 5. A felhasználó az AI-tól kérhet szöveges visszajelzést.  
-6. Az AI (pl. OpenAI API) elemzi a kiadásokat, és visszaadja a javaslatokat.  
+6. A Google Gemini AI elemzi a kiadásokat, és személyre szabott javaslatokat küld vissza.  
 7. Az eredmények megjelennek a React frontendben, letisztult vizuális formában.
 
 ---
@@ -98,7 +98,7 @@ A felhasználók adatbiztonságát alapvető szinten garantálni kell (pl. loká
 
 ## 1.7 Irányított és szabad szöveges riportok
 - **Irányított riport:** havi statisztikai összefoglaló kategóriák szerint (pl. étel, rezsi, közlekedés).  
-- **Szabad szöveges riport:** az AI által készített személyre szabott pénzügyi tanácsok.  
+- **Szabad szöveges riport:** a Gemini AI által készített személyre szabott pénzügyi tanácsok.
 
 > Példa: „Ebben a hónapban a legtöbbet szórakozásra költöttél.  
 > Javaslom, hogy tarts heti szinten költségkorlátot.”
@@ -108,7 +108,7 @@ A felhasználók adatbiztonságát alapvető szinten garantálni kell (pl. loká
 ## 1.8 Fogalomszótár
 | Fogalom | Jelentés |
 |----------|-----------|
-| **AI** | Mesterséges intelligencia – OpenAI API, amely elemzi a kiadási adatokat. |
+| **Gemini AI** | A Google mesterséges intelligencia modellje, amely elemzi a kiadási adatokat és tanácsokat generál. |
 | **Flask** | Python alapú webes backend keretrendszer. |
 | **React** | JavaScript alapú frontend könyvtár, amely a felhasználói felületet kezeli. |
 | **SQLite** | Egyszerű, lokális relációs adatbázis, a projekt adataihoz. |
